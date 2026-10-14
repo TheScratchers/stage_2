@@ -1,0 +1,19 @@
+# Archivos de compilación de Maven
+target/
+*.jar
+
+# Entornos de desarrollo
+.idea/
+*.iml
+.vscode/
+
+# Datos generados localmente (Datalake, Datamarts y Benchmarks)
+data/
+control/
+*.json
+*.sqlite
+*.db
+
+# PDFs de reportes antiguos
+*.pdf
+.DS_Store
