@@ -16,6 +16,8 @@ Read through `common.Config` (environment variable → JVM system property → d
 | `BROKER_URL` | `tcp://localhost:61616` | all services |
 | `INDEXING_WORKERS` | `2` | indexing-service (consumer threads per process) |
 | `GUTENBERG_BASE_URL` | `https://www.gutenberg.org` | ingestion-service |
+| `GUTENBERG_TIMEOUT_SECONDS` | `30` | ingestion-service |
+| `DATALAKE_LAYOUT` | `time_based` | ingestion-service |
 
 ## 2. Data on disk and single-writer ownership
 
@@ -24,7 +26,7 @@ Each service creates its directories at startup, before opening SQLite.
 
 | Path (under `DATA_DIR`) | Writer | Readers | Content |
 |---|---|---|---|
-| `datalake/yyyyMMdd/HH/<id>.header.txt`, `<id>.body.txt` | Ingestion | Indexing | Book split into header and body (Stage 1 time-based layout) |
+| `datalake/yyyyMMdd/HH/<id>.header.txt`, `<id>.body.txt` | Ingestion | Indexing | Book split into header and body (Stage 1 time-based layout, UTC ingestion hour). Consumers must use the paths published in events / `ingestion_log`, never rebuild them. |
 | `datalake/ingestion.db` | Ingestion | Ingestion | `ingestion_log`: persistent record of books ready for indexing |
 | `datamarts/datamart.db` | Indexing | Search (read-only) | `books`, `postings`, `index_meta` |
 
