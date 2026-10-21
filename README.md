@@ -70,6 +70,9 @@ name (`-DKEY=value`), then from the default. Nothing is hard-coded in the servic
 | `INGESTION_PORT` | `7001` | HTTP port of the Ingestion Service |
 | `INDEXING_PORT` | `7002` | HTTP port of the Indexing Service |
 | `SEARCH_PORT` | `7003` | HTTP port of the Search Service |
+| `GUTENBERG_BASE_URL` | `https://www.gutenberg.org` | Source of the downloads (`/cache/epub/{id}/pg{id}.txt`) |
+| `GUTENBERG_TIMEOUT_SECONDS` | `30` | Connection and request timeout for each download |
+| `DATALAKE_LAYOUT` | `time_based` | Datalake structure: `time_based` (`yyyyMMdd/HH`, UTC), `book_based` or `batch_based` |
 
 Example (PowerShell): `$env:SEARCH_PORT=8003; java -jar search-service/target/search-service.jar`
 
