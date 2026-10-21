@@ -27,6 +27,31 @@ class HeaderParserTest {
     }
 
     @Test
+    void joinsAuthorsSpanningSeveralLines() throws IOException {
+        String header = Files.readString(SAMPLES.resolve("2591.header.txt"), StandardCharsets.UTF_8);
+
+        ParsedHeader parsed = HeaderParser.parse(header);
+
+        assertEquals("Grimms' Fairy Tales", parsed.title());
+        assertEquals("Jacob Grimm, Wilhelm Grimm", parsed.author());
+        assertEquals(2001, parsed.year());
+    }
+
+    @Test
+    void joinsTitlesSpanningSeveralLinesWithASpace() {
+        ParsedHeader parsed = HeaderParser.parse(
+                "Title: A Christmas Carol in Prose;\r\n       Being a Ghost Story of Christmas\r\n\r\nAuthor: Charles Dickens\r\n");
+
+        assertEquals("A Christmas Carol in Prose; Being a Ghost Story of Christmas", parsed.title());
+        assertEquals("Charles Dickens", parsed.author());
+    }
+
+    @Test
+    void neverTakesTheEbookNumberAsTheYear() {
+        assertNull(HeaderParser.parse("Release date: [eBook #2701]\n").year());
+    }
+
+    @Test
     void missingFieldsBecomeNullAndTitleBecomesUntitled() {
         ParsedHeader parsed = HeaderParser.parse("The Project Gutenberg eBook\r\n\r\nCredits: someone\r\n");
 
