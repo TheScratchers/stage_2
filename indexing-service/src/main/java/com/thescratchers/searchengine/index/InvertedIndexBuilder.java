@@ -1,6 +1,6 @@
 package com.thescratchers.searchengine.index;
 
-import com.thescratchers.searchengine.datamarts.TextTokenizer;
+import com.thescratchers.searchengine.common.TextTokenizer;
 import com.thescratchers.searchengine.datamarts.index.InvertedIndexStorage;
 
 import java.io.IOException;
