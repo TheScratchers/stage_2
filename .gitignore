@@ -1,19 +1,25 @@
-# Archivos de compilación de Maven
+# Maven build output
 target/
 *.jar
 
-# Entornos de desarrollo
+# IDEs and OS files
 .idea/
 *.iml
 .vscode/
-
-# Datos generados localmente (Datalake, Datamarts y Benchmarks)
-data/
-control/
-*.json
-*.sqlite
-*.db
-
-# PDFs de reportes antiguos
-*.pdf
 .DS_Store
+desktop.ini
+Thumbs.db
+
+# Data generated at runtime (datalake, datamarts, broker store, logs)
+data/
+activemq-data/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.log
+
+# Team working documents kept next to the repo root (assignment, guides, screenshots).
+# The final report lives under docs/ and IS versioned.
+/*.pdf
+/*.png
