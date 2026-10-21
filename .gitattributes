@@ -1,0 +1,5 @@
+# Normalise line endings of text files in the repository.
+* text=auto
+
+# Sample books are test fixtures: keep their bytes exactly as downloaded on every OS.
+samples/books/*.txt -text

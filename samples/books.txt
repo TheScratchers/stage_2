@@ -1,0 +1,57 @@
+# Stage 2 - Fixed corpus: 20 real Project Gutenberg books.
+#
+# Every test, API check and benchmark of Stage 2 uses exactly these books,
+# so that results are comparable across experiments (Stage 1 feedback:
+# "benchmark on the same common subset"). It is the same corpus used in
+# Stage 1. All 20 books are bundled, already split into header and body,
+# in samples/books/<id>.header.txt and samples/books/<id>.body.txt, so
+# tests run offline.
+#
+# Format: one Gutenberg book_id per line. Blank lines and lines starting
+# with "#" are comments and must be ignored by parsers.
+#
+# id    | title                                      | author
+# ------|--------------------------------------------|------------------------
+# 11    | Alice's Adventures in Wonderland            | Lewis Carroll
+# 84    | Frankenstein                                | Mary Shelley
+# 1342  | Pride and Prejudice                         | Jane Austen
+# 2701  | Moby-Dick                                   | Herman Melville
+# 1661  | The Adventures of Sherlock Holmes           | Arthur Conan Doyle
+# 98    | A Tale of Two Cities                        | Charles Dickens
+# 345   | Dracula                                     | Bram Stoker
+# 76    | Adventures of Huckleberry Finn               | Mark Twain
+# 74    | The Adventures of Tom Sawyer                | Mark Twain
+# 43    | The Strange Case of Dr Jekyll and Mr Hyde   | Robert Louis Stevenson
+# 174   | The Picture of Dorian Gray                  | Oscar Wilde
+# 46    | A Christmas Carol                           | Charles Dickens
+# 120   | Treasure Island                             | Robert Louis Stevenson
+# 1260  | Jane Eyre                                   | Charlotte Bronte
+# 2554  | Crime and Punishment                        | Fyodor Dostoevsky
+# 844   | The Importance of Being Earnest             | Oscar Wilde
+# 1400  | Great Expectations                          | Charles Dickens
+# 2591  | Grimm's Fairy Tales                         | Jacob and Wilhelm Grimm
+# 5200  | Metamorphosis                               | Franz Kafka
+# 55    | The Wonderful Wizard of Oz                  | L. Frank Baum
+#
+# Note: all 20 books are in English, so language filters can only be
+# exercised with "en" on this corpus.
+11
+84
+1342
+2701
+1661
+98
+345
+76
+74
+43
+174
+46
+120
+1260
+2554
+844
+1400
+2591
+5200
+55

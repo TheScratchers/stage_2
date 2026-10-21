@@ -1,69 +1,94 @@
-# 🚀 Search Engine - Stage 2: Service-Oriented Architecture (SOA)
+# Search Engine – Stage 2: Service-Oriented Architecture
 
-> **Nota:** Este es un README provisional.
+Big Data · BSc in Data Science and Engineering · Universidad de Las Palmas de Gran Canaria (ULPGC) — team **TheScratchers**
 
-En esta fase, dejamos atrás el script de control monolítico del Stage 1 para evolucionar hacia una arquitectura distribuida basada en microservicios, preparando el sistema para su futuro despliegue en un clúster (Stage 3).
+Stage 2 turns the Stage 1 data layer (datalake + datamarts) into cooperating Java 17 microservices
+built with Javalin and Gson, all running on a single machine:
 
-## 🛠️ ¿Qué se ha hecho? (La Migración)
+| Service | Responsibility | Default port |
+|---|---|---|
+| `ingestion-service` | Downloads Project Gutenberg books, splits header/body and stores them in the datalake | 7001 |
+| `indexing-service` | Extracts metadata (title, author, language, year) and builds the inverted index in the datamart | 7002 |
+| `search-service` | Front-end API: keyword search with author, language and year filters and pagination | 7003 |
 
-Para cumplir con los requisitos del Stage 2, hemos reestructurado completamente el repositorio. Hemos extraído la lógica *core* (descargas, tokenización, índices y SQLite) que construimos en el Stage 1 y la hemos encapsulado en proyectos Maven independientes. 
+Coordination is choreography through an **ActiveMQ** broker (`BookDownloaded` / `BookIndexed` events),
+complemented by internal HTTP endpoints. The shared rules (data ownership, SQLite schema, events,
+tokenizer, corpus) are in [`docs/contracts.md`](docs/contracts.md).
 
-**Importante:** Hemos añadido un `.gitignore` estricto. La carpeta `data/` (con los libros descargados, los datamarts y las bases de datos) **NO se sube a GitHub** para mantener el repositorio limpio y evitar conflictos o bloqueos por tamaño. Cada miembro generará sus propios datos en local.
+> **Status:** base setup. Every service builds, starts and answers `GET /health`; the business
+> endpoints, the broker and the API specification are being added on top of this base.
 
-### Estructura actual del repositorio
+## Repository layout
 
 ```text
 stage_2/
-├── ingestion-service/      # Lógica del Datalake (Downloader, Layout)
-├── indexing-service/       # Extracción de metadatos, Tokenizer y almacenamiento en SQLite
-├── search-service/         # ¡Nuevo! Estructura vacía para la API de búsqueda
-├── benchmarks/             # Antiguos tests de JMH del Stage 1 aislados aquí
-├── control-module/         # Módulo de control antiguo (pendiente de refactorizar/eliminar)
-├── pom_referencia_stage1.xml # POM antiguo para consultar versiones de dependencias
-└── README.md
-
+├── pom.xml               # parent POM: modules, dependency versions, plugins, "jmh" profile
+├── common/               # Config, TextTokenizer, Sqlite, BookRecord (shared by all services)
+├── ingestion-service/    # com.thescratchers.searchengine.ingestion
+├── indexing-service/     # com.thescratchers.searchengine.indexing
+├── search-service/       # com.thescratchers.searchengine.search
+├── samples/              # fixed corpus: books.txt, words.txt and the 20 books split in books/
+└── docs/
+    └── contracts.md      # shared contracts between services
 ```
 
-*(Toda la estructura de paquetes de Java `com.thescratchers.searchengine` se ha mantenido intacta para no romper las referencias)*.
+## Requirements
 
-## 🎯 Objetivos a desarrollar en el Stage 2
+- JDK 17 or newer (the code targets Java 17)
+- Maven 3.9 or newer
 
-Nuestra meta es transformar estas carpetas aisladas en microservicios concurrentes reales. A continuación, se presenta el resumen de la hoja de ruta técnica, seguido del desglose de cada fase:
+## Build and test
 
-| Fase / Objetivo | Componentes Clave | Descripción Breve |
-| --- | --- | --- |
-| **1. Configuración Multi-Módulo** | Maven, dependencias | Unificar la compilación creando un `pom.xml` padre y añadiendo Javalin y ActiveMQ. |
-| **2. Arquitectura Orientada a Eventos** | ActiveMQ, Javalin | Desacoplar los servicios mediante un *message broker* (productor/consumidor). |
-| **3. Diseño de Contratos (API)** | OpenAPI / Swagger | Definir los endpoints REST exactos (`GET /search`, `POST /ingest`) antes de programarlos. |
-| **4. Concurrencia y Sincronización** | Hilos, Réplicas, SQLite | Implementar control de bloqueos para que múltiples *workers* no corrompan los índices. |
-| **5. Benchmarking de Integración** | JMH, Métricas del sistema | Medir el *throughput* total, la latencia bajo carga y los cuellos de botella del pipeline. |
+```bash
+mvn clean verify
+```
 
-### Detalle de las fases de desarrollo
+This compiles every module, runs all the tests and produces one executable jar per service:
+`<service>/target/<service>.jar`. Benchmark classes live under `src/test/java` and are never
+included in those jars.
 
-**1. Configuración Multi-Módulo (Maven)**
-En lugar de compilar cada servicio a mano, crearemos un `pom.xml` padre en la raíz del repositorio. Este archivo gestionará las versiones de todas nuestras librerías compartidas. Integraremos **Javalin** para levantar los servidores web ligeros, **Gson/Jackson** para el manejo de JSON, y **ActiveMQ** para la comunicación asíncrona.
+## Run the services
 
-**2. Arquitectura Orientada a Eventos (Coreografía)**
-Sustituiremos el antiguo `ControlLayer.java` por un sistema de mensajería (ActiveMQ) para evitar cuellos de botella:
+Each service is an independent process:
 
-* **Ingestion Service:** Expondrá el endpoint `POST /ingest/{id}`. Descargará el archivo, lo guardará en el datalake y publicará un evento `BookDownloaded` en la cola del broker.
-* **Indexing Service:** Funcionará en segundo plano sin endpoints públicos. Estará suscrito a la cola del broker; al recibir el evento, leerá el datalake, extraerá los metadatos, actualizará SQLite y marcará el trabajo como terminado.
-* **Search Service:** Expondrá `GET /search`. Solo realizará lecturas sobre la base de datos SQLite para servir los resultados JSON a los usuarios de forma casi instantánea.
+```bash
+java -jar ingestion-service/target/ingestion-service.jar
+java -jar indexing-service/target/indexing-service.jar
+java -jar search-service/target/search-service.jar
 
-**3. Diseño de Contratos (OpenAPI)**
-Antes de escribir el código de los controladores en Javalin, diseñaremos el contrato de nuestra API usando la especificación OpenAPI (YAML/JSON). Documentaremos exactamente qué parámetros acepta el Front-End (búsqueda por *keyword*, filtros de *author*, *language*, *year*, y paginación) y qué códigos de estado HTTP devolvemos en caso de éxito o error.
+curl http://localhost:7003/health     # {"service":"search-service","status":"UP"}
+```
 
-**4. Concurrencia y Threading**
-Este es el reto principal que exige el Stage 2. El sistema debe soportar múltiples peticiones a la vez. Si decidimos levantar varias réplicas del *Indexing Service* para que procesen libros en paralelo, debemos asegurar que no intenten escribir en la misma tabla de SQLite al mismo tiempo. Implementaremos mecanismos de control (bloqueos de archivo, transacciones ACID o reparto seguro de tareas) para evitar colisiones y corrupción de datos.
+## Configuration
 
-**5. Benchmarking de Integración**
-Reutilizaremos nuestra experiencia con JMH, pero subiendo de nivel. Pasaremos de hacer *microbenchmarking* de funciones aisladas a medir el rendimiento de toda la arquitectura bajo estrés. Evaluaremos:
+Every value is read from an environment variable, then from a JVM system property with the same
+name (`-DKEY=value`), then from the default. Nothing is hard-coded in the services.
 
-* **Throughput de ingesta:** Cuántos libros por segundo recorren todo el pipeline desde que se hace el `POST` hasta que están en SQLite.
-* **Latencia de búsqueda:** El tiempo de respuesta del `GET /search` cuando hay cientos de consultas simultáneas.
-* **Uso de recursos:** Monitorización de CPU y RAM para identificar cuál de los tres servicios se satura primero y necesita más réplicas en el futuro clúster del Stage 3.
+| Variable | Default | Meaning |
+|---|---|---|
+| `DATA_DIR` | `./data` | Root of `datalake/` and `datamarts/` (created on startup if missing) |
+| `INGESTION_PORT` | `7001` | HTTP port of the Ingestion Service |
+| `INDEXING_PORT` | `7002` | HTTP port of the Indexing Service |
+| `SEARCH_PORT` | `7003` | HTTP port of the Search Service |
 
----
+Example (PowerShell): `$env:SEARCH_PORT=8003; java -jar search-service/target/search-service.jar`
 
-**TheScratchers** - GCID ULPGC
+## Fixed corpus
 
+All tests, API checks and benchmarks use the same 20 Gutenberg books (`samples/books.txt`) and the
+same 10 query words (`samples/words.txt`), inherited from Stage 1. The books are bundled in
+`samples/books/` already split into `<id>.header.txt` and `<id>.body.txt`, so tests run offline.
+
+## Microbenchmarks (JMH)
+
+JMH benchmarks live in `src/test/java/.../benchmark/` of each service. To run those of one module:
+
+```bash
+mvn -q install -DskipTests
+mvn -pl indexing-service -Pjmh test-compile exec:exec -Djmh.args="-rf csv -rff jmh-results.csv"
+```
+
+## Technology versions
+
+Java 17 · Javalin 6.1.3 · Gson 2.11.0 · SLF4J 2.0.9 · sqlite-jdbc 3.47.1.0 · ActiveMQ 6.3.2 ·
+JMH 1.37 · JUnit 5.11.4 (all pinned in the parent `pom.xml`).

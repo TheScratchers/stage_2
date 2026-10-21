@@ -1,0 +1,22 @@
+# Stage 2 - Fixed query workload: 10 search terms over the corpus in
+# books.txt, used by the API checks and the search benchmarks (the same
+# workload as Stage 1).
+#
+# Three expected frequency tiers, so queries stress the index differently:
+#
+#   common (expected in most of the 20 books): time, love, heart, nothing
+#   medium (recurring theme, not universal):    death, truth, fortune, monster
+#   rare   (tied to one book):                  wonderland (11), darcy (1342)
+#
+# Format: one lowercase word per line. Blank lines and lines starting with
+# "#" are comments and must be ignored by parsers.
+time
+love
+heart
+nothing
+death
+truth
+fortune
+monster
+wonderland
+darcy
