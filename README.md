@@ -13,10 +13,11 @@ built with Javalin and Gson, all running on a single machine:
 
 Coordination is choreography through an **ActiveMQ** broker (`BookDownloaded` / `BookIndexed` events),
 complemented by internal HTTP endpoints. The shared rules (data ownership, SQLite schema, events,
-tokenizer, corpus) are in [`docs/contracts.md`](docs/contracts.md).
+tokenizer, corpus) are in [`docs/contracts.md`](docs/contracts.md), and every HTTP endpoint is
+specified in [`docs/openapi.yaml`](docs/openapi.yaml) (OpenAPI 3.0).
 
 > **Status:** base setup. Every service builds, starts and answers `GET /health`; the business
-> endpoints, the broker and the API specification are being added on top of this base.
+> endpoints and the broker are being added on top of this base.
 
 ## Repository layout
 
@@ -29,7 +30,8 @@ stage_2/
 ├── search-service/       # com.thescratchers.searchengine.search
 ├── samples/              # fixed corpus: books.txt, words.txt and the 20 books split in books/
 └── docs/
-    └── contracts.md      # shared contracts between services
+    ├── contracts.md      # shared contracts between services
+    └── openapi.yaml      # versioned HTTP API specification (OpenAPI 3.0)
 ```
 
 ## Requirements
