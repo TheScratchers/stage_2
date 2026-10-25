@@ -360,6 +360,7 @@ components:
       schema:
         type: integer
         minimum: 0
+        maximum: 999999999
         default: 0
     Limit:
       name: limit
@@ -399,7 +400,11 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
           examples:
             missingQuery:
-              summary: q missing or without terms (GET /search?q=%3F%3F)
+              summary: q missing or blank (GET /search?author=twain)
+              value:
+                error: {code: INVALID_PARAMETER, message: q is required}
+            queryWithoutWords:
+              summary: q without any word (GET /search?q=%3F%3F)
               value:
                 error: {code: INVALID_PARAMETER, message: q must contain at least one word}
             limitOutOfRange:
