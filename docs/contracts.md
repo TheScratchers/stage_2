@@ -101,7 +101,8 @@ A single `common.TextTokenizer` is used both for indexing and for queries: lower
   `{"error":{"code":"INVALID_PARAMETER","message":"limit must be between 1 and 100"}}` with codes
   `400 INVALID_PARAMETER`, `404 NOT_FOUND`, `409 CONFLICT`, `502 UPSTREAM_ERROR`,
   `503 UNAVAILABLE`, `500 INTERNAL_ERROR`.
-- The full, versioned specification of every endpoint will live in `docs/openapi.yaml`.
+- The full, versioned specification of every endpoint is `docs/openapi.yaml` (OpenAPI 3.0). Each
+  service owner adds and updates their own routes there, in the same pull request that changes them.
 
 ## 7. Fixed corpus
 
