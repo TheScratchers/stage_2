@@ -25,6 +25,7 @@ specified in [`docs/openapi.yaml`](docs/openapi.yaml) (OpenAPI 3.0).
 stage_2/
 ├── pom.xml               # parent POM: modules, dependency versions, plugins, "jmh" profile
 ├── common/               # Config, TextTokenizer, Sqlite, BookRecord (shared by all services)
+├── broker/               # com.thescratchers.searchengine.broker (ActiveMQ broker process)
 ├── ingestion-service/    # com.thescratchers.searchengine.ingestion
 ├── indexing-service/     # com.thescratchers.searchengine.indexing
 ├── search-service/       # com.thescratchers.searchengine.search
@@ -54,6 +55,7 @@ included in those jars.
 Each service is an independent process:
 
 ```bash
+java -jar broker/target/broker.jar
 java -jar ingestion-service/target/ingestion-service.jar
 java -jar indexing-service/target/indexing-service.jar
 java -jar search-service/target/search-service.jar
@@ -72,6 +74,7 @@ name (`-DKEY=value`), then from the default. Nothing is hard-coded in the servic
 | `INGESTION_PORT` | `7001` | HTTP port of the Ingestion Service |
 | `INDEXING_PORT` | `7002` | HTTP port of the Indexing Service |
 | `SEARCH_PORT` | `7003` | HTTP port of the Search Service |
+| `BROKER_URL` | `tcp://localhost:61616` | ActiveMQ broker connector URL |
 | `GUTENBERG_BASE_URL` | `https://www.gutenberg.org` | Source of the downloads (`/cache/epub/{id}/pg{id}.txt`) |
 | `GUTENBERG_TIMEOUT_SECONDS` | `30` | Connection and request timeout for each download |
 | `DATALAKE_LAYOUT` | `time_based` | Datalake structure: `time_based` (`yyyyMMdd/HH`, UTC), `book_based` or `batch_based` |
