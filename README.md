@@ -29,6 +29,7 @@ stage_2/
 ├── ingestion-service/    # com.thescratchers.searchengine.ingestion
 ├── indexing-service/     # com.thescratchers.searchengine.indexing
 ├── search-service/       # com.thescratchers.searchengine.search
+├── api-tests/            # data-driven HTTP checks of the APIs and their expected results
 ├── samples/              # fixed corpus: books.txt, words.txt and the 20 books split in books/
 └── docs/
     ├── contracts.md      # shared contracts between services
@@ -94,6 +95,18 @@ name (`-DKEY=value`), then from the default. Nothing is hard-coded in the servic
 | `DATALAKE_LAYOUT` | `time_based` | Datalake structure: `time_based` (`yyyyMMdd/HH`, UTC), `book_based` or `batch_based` |
 
 Example (PowerShell): `$env:SEARCH_PORT=8003; java -jar search-service/target/search-service.jar`
+
+## API checks
+
+[`api-tests/`](api-tests/README.md) holds automated HTTP checks of the APIs with their expected
+results. They run on every `mvn clean verify`, and can also be run against a running service:
+
+```bash
+java -jar api-tests/target/api-tests.jar check http://localhost:7003 api-tests/cases/search.json
+```
+
+See [`api-tests/README.md`](api-tests/README.md) for the fixture data, the full procedure and what
+each case file checks.
 
 ## Fixed corpus
 

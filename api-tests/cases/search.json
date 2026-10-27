@@ -1,0 +1,663 @@
+{
+  "description": "Front-end Search API checks (GET /search, GET /books/{book_id}, GET /search/filters, GET /health and CORS) against the fixture datamart of api-tests/src/main/resources/fixture-datamart.sql. Expected results are worked out by hand from the six fixture books.",
+  "cases": [
+    {
+      "name": "health: the service is up",
+      "path": "/health",
+      "status": 200,
+      "body": {
+        "service": "search-service",
+        "status": "UP"
+      }
+    },
+    {
+      "name": "keyword: one term, ordered by score then book_id, default page",
+      "path": "/search?q=adventure",
+      "status": 200,
+      "body": {
+        "query": "adventure",
+        "terms": [
+          "adventure"
+        ],
+        "filters": {},
+        "total": 5,
+        "offset": 0,
+        "limit": 20,
+        "results": [
+          {
+            "book_id": 2,
+            "title": "Tales of Adventure",
+            "author": "Mark Twain",
+            "language": "en",
+            "year": 2004,
+            "score": 4
+          },
+          {
+            "book_id": 4,
+            "score": 4
+          },
+          {
+            "book_id": 1,
+            "score": 2
+          },
+          {
+            "book_id": 3,
+            "score": 2
+          },
+          {
+            "book_id": 5,
+            "score": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "keyword: several terms are combined with AND and their frequencies summed",
+      "path": "/search?q=river%20adventure",
+      "status": 200,
+      "body": {
+        "terms": [
+          "river",
+          "adventure"
+        ],
+        "total": 3,
+        "results": [
+          {
+            "book_id": 5,
+            "score": 10
+          },
+          {
+            "book_id": 1,
+            "score": 7
+          },
+          {
+            "book_id": 2,
+            "score": 5
+          }
+        ]
+      }
+    },
+    {
+      "name": "keyword: case, punctuation and repeated words are normalised",
+      "path": "/search?q=RIVER,%20Adventure!%20river",
+      "status": 200,
+      "body": {
+        "query": "RIVER, Adventure! river",
+        "terms": [
+          "river",
+          "adventure"
+        ],
+        "total": 3,
+        "results": [
+          {
+            "book_id": 5
+          },
+          {
+            "book_id": 1
+          },
+          {
+            "book_id": 2
+          }
+        ]
+      }
+    },
+    {
+      "name": "keyword: accented words match whole",
+      "path": "/search?q=Rivi%C3%A8re",
+      "status": 200,
+      "body": {
+        "terms": [
+          "rivière"
+        ],
+        "total": 1,
+        "results": [
+          {
+            "book_id": 4,
+            "title": "Voyage sur la rivière",
+            "author": null,
+            "language": "fr",
+            "year": 1998,
+            "score": 2
+          }
+        ]
+      }
+    },
+    {
+      "name": "keyword: missing metadata is returned as null",
+      "path": "/search?q=moor",
+      "status": 200,
+      "body": {
+        "total": 2,
+        "results": [
+          {
+            "book_id": 3,
+            "author": "Charlotte Brontë",
+            "score": 7
+          },
+          {
+            "book_id": 6,
+            "title": "Untitled",
+            "author": "Anonymous",
+            "language": null,
+            "year": 2010,
+            "score": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "filter author: case-insensitive substring",
+      "path": "/search?q=adventure&author=TWAIN",
+      "status": 200,
+      "body": {
+        "filters": {
+          "author": "TWAIN"
+        },
+        "total": 2,
+        "results": [
+          {
+            "book_id": 2
+          },
+          {
+            "book_id": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "filter author: non-ASCII letters are case-folded",
+      "path": "/search?q=moor&author=BRONT%C3%8B",
+      "status": 200,
+      "body": {
+        "filters": {
+          "author": "BRONTË"
+        },
+        "total": 1,
+        "results": [
+          {
+            "book_id": 3
+          }
+        ]
+      }
+    },
+    {
+      "name": "filter author: books without author never match",
+      "path": "/search?q=rivi%C3%A8re&author=a",
+      "status": 200,
+      "body": {
+        "total": 0,
+        "results": []
+      }
+    },
+    {
+      "name": "filter language: exact code, normalised to lower case",
+      "path": "/search?q=adventure&language=FR",
+      "status": 200,
+      "body": {
+        "filters": {
+          "language": "fr"
+        },
+        "total": 2,
+        "results": [
+          {
+            "book_id": 4
+          },
+          {
+            "book_id": 5
+          }
+        ]
+      }
+    },
+    {
+      "name": "filter language: well-formed code without books",
+      "path": "/search?q=adventure&language=de",
+      "status": 200,
+      "body": {
+        "filters": {
+          "language": "de"
+        },
+        "total": 0,
+        "results": []
+      }
+    },
+    {
+      "name": "filter year: exact release year",
+      "path": "/search?q=adventure&year=1998",
+      "status": 200,
+      "body": {
+        "filters": {
+          "year": 1998
+        },
+        "total": 2,
+        "results": [
+          {
+            "book_id": 4
+          },
+          {
+            "book_id": 3
+          }
+        ]
+      }
+    },
+    {
+      "name": "filter: empty values are ignored",
+      "path": "/search?q=adventure&author=&language=&year=",
+      "status": 200,
+      "body": {
+        "filters": {},
+        "total": 5
+      }
+    },
+    {
+      "name": "combined: author + language + year",
+      "path": "/search?q=adventure&author=twain&language=en&year=2004",
+      "status": 200,
+      "body": {
+        "filters": {
+          "author": "twain",
+          "language": "en",
+          "year": 2004
+        },
+        "total": 2,
+        "results": [
+          {
+            "book_id": 2
+          },
+          {
+            "book_id": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "combined: language + year",
+      "path": "/search?q=adventure&language=fr&year=1998",
+      "status": 200,
+      "body": {
+        "filters": {
+          "language": "fr",
+          "year": 1998
+        },
+        "total": 1,
+        "results": [
+          {
+            "book_id": 4
+          }
+        ]
+      }
+    },
+    {
+      "name": "combined: several terms + author",
+      "path": "/search?q=river%20adventure&author=verne",
+      "status": 200,
+      "body": {
+        "total": 1,
+        "results": [
+          {
+            "book_id": 5,
+            "score": 10
+          }
+        ]
+      }
+    },
+    {
+      "name": "combined: filters that exclude each other give no results",
+      "path": "/search?q=adventure&author=twain&language=fr",
+      "status": 200,
+      "body": {
+        "total": 0,
+        "results": []
+      }
+    },
+    {
+      "name": "empty: unknown word returns 200 with an empty list",
+      "path": "/search?q=zxqv",
+      "status": 200,
+      "body": {
+        "query": "zxqv",
+        "terms": [
+          "zxqv"
+        ],
+        "filters": {},
+        "total": 0,
+        "offset": 0,
+        "limit": 20,
+        "results": []
+      }
+    },
+    {
+      "name": "empty: AND of words never found together",
+      "path": "/search?q=raft%20moor",
+      "status": 200,
+      "body": {
+        "total": 0,
+        "results": []
+      }
+    },
+    {
+      "name": "pagination: page 1 of 3",
+      "path": "/search?q=adventure&limit=2",
+      "status": 200,
+      "body": {
+        "total": 5,
+        "offset": 0,
+        "limit": 2,
+        "results": [
+          {
+            "book_id": 2
+          },
+          {
+            "book_id": 4
+          }
+        ]
+      }
+    },
+    {
+      "name": "pagination: page 2 of 3",
+      "path": "/search?q=adventure&offset=2&limit=2",
+      "status": 200,
+      "body": {
+        "total": 5,
+        "offset": 2,
+        "limit": 2,
+        "results": [
+          {
+            "book_id": 1
+          },
+          {
+            "book_id": 3
+          }
+        ]
+      }
+    },
+    {
+      "name": "pagination: last, partial page",
+      "path": "/search?q=adventure&offset=4&limit=2",
+      "status": 200,
+      "body": {
+        "total": 5,
+        "offset": 4,
+        "limit": 2,
+        "results": [
+          {
+            "book_id": 5
+          }
+        ]
+      }
+    },
+    {
+      "name": "pagination: offset beyond the total keeps the total",
+      "path": "/search?q=adventure&offset=10",
+      "status": 200,
+      "body": {
+        "total": 5,
+        "offset": 10,
+        "results": []
+      }
+    },
+    {
+      "name": "pagination: the maximum limit of 100 is accepted",
+      "path": "/search?q=adventure&limit=100",
+      "status": 200,
+      "body": {
+        "limit": 100,
+        "total": 5
+      }
+    },
+    {
+      "name": "invalid: q missing",
+      "path": "/search?author=twain",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "q is required"
+        }
+      }
+    },
+    {
+      "name": "invalid: q blank",
+      "path": "/search?q=%20%20",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "q is required"
+        }
+      }
+    },
+    {
+      "name": "invalid: q without words",
+      "path": "/search?q=%3F%3F%201999",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "q must contain at least one word"
+        }
+      }
+    },
+    {
+      "name": "invalid: q longer than 200 characters",
+      "path": "/search?q=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "q must be at most 200 characters"
+        }
+      }
+    },
+    {
+      "name": "invalid: author longer than 100 characters",
+      "path": "/search?q=adventure&author=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "author must be at most 100 characters"
+        }
+      }
+    },
+    {
+      "name": "invalid: language is not a two-letter code",
+      "path": "/search?q=adventure&language=eng",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "language must be a two-letter ISO 639-1 code"
+        }
+      }
+    },
+    {
+      "name": "invalid: year with two digits",
+      "path": "/search?q=adventure&year=98",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "year must be a four-digit number"
+        }
+      }
+    },
+    {
+      "name": "invalid: year is not a number",
+      "path": "/search?q=adventure&year=abcd",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "year must be a four-digit number"
+        }
+      }
+    },
+    {
+      "name": "invalid: negative offset",
+      "path": "/search?q=adventure&offset=-1",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "offset must be a non-negative integer below 1000000000"
+        }
+      }
+    },
+    {
+      "name": "invalid: offset is not a number",
+      "path": "/search?q=adventure&offset=two",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "offset must be a non-negative integer below 1000000000"
+        }
+      }
+    },
+    {
+      "name": "invalid: limit 0",
+      "path": "/search?q=adventure&limit=0",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "limit must be between 1 and 100"
+        }
+      }
+    },
+    {
+      "name": "invalid: limit 101",
+      "path": "/search?q=adventure&limit=101",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "limit must be between 1 and 100"
+        }
+      }
+    },
+    {
+      "name": "book: metadata of an indexed book",
+      "path": "/books/3",
+      "status": 200,
+      "body": {
+        "book_id": 3,
+        "title": "Moorland Stories",
+        "author": "Charlotte Brontë",
+        "language": "en",
+        "year": 1998,
+        "indexed_at": "2026-10-25T10:00:03Z"
+      }
+    },
+    {
+      "name": "book: null metadata",
+      "path": "/books/5",
+      "status": 200,
+      "body": {
+        "book_id": 5,
+        "title": "Le Fleuve",
+        "author": "Jules Verne",
+        "language": "fr",
+        "year": null
+      }
+    },
+    {
+      "name": "book: not indexed",
+      "path": "/books/999",
+      "status": 404,
+      "body": {
+        "error": {
+          "code": "NOT_FOUND",
+          "message": "book 999 is not indexed"
+        }
+      }
+    },
+    {
+      "name": "book: id is not a number",
+      "path": "/books/abc",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "book_id must be a positive integer"
+        }
+      }
+    },
+    {
+      "name": "book: id is not positive",
+      "path": "/books/0",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "book_id must be a positive integer"
+        }
+      }
+    },
+    {
+      "name": "filters: languages and years with book counts",
+      "path": "/search/filters",
+      "status": 200,
+      "body": {
+        "total_books": 6,
+        "languages": [
+          {
+            "code": "en",
+            "books": 3
+          },
+          {
+            "code": "fr",
+            "books": 2
+          }
+        ],
+        "years": [
+          {
+            "year": 1998,
+            "books": 2
+          },
+          {
+            "year": 2004,
+            "books": 2
+          },
+          {
+            "year": 2010,
+            "books": 1
+          }
+        ],
+        "index_updated_at": "2026-10-25T12:00:00Z"
+      }
+    },
+    {
+      "name": "cors: a browser on another origin may read the response",
+      "path": "/search?q=raft",
+      "headers": {
+        "Origin": "http://frontend.example"
+      },
+      "status": 200,
+      "response_headers": {
+        "Access-Control-Allow-Origin": "*"
+      },
+      "body": {
+        "total": 1,
+        "results": [
+          {
+            "book_id": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "cors: preflight request is accepted",
+      "method": "OPTIONS",
+      "path": "/search?q=raft",
+      "headers": {
+        "Origin": "http://frontend.example",
+        "Access-Control-Request-Method": "GET"
+      },
+      "status": 200,
+      "response_headers": {
+        "Access-Control-Allow-Origin": "*"
+      }
+    }
+  ]
+}
