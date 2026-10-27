@@ -22,9 +22,9 @@ import java.sql.Statement;
  *    6 | Anonymous              | -    | 2010 | moor=1
  * </pre>
  */
-final class TestDatamart {
+public final class TestDatamart {
 
-    static final String LAST_UPDATE = "2026-10-25T12:00:00Z";
+    public static final String LAST_UPDATE = "2026-10-25T12:00:00Z";
 
     private static final String[] STATEMENTS = {
         "CREATE TABLE books (book_id INTEGER PRIMARY KEY, title TEXT NOT NULL, author TEXT, "
@@ -57,14 +57,14 @@ final class TestDatamart {
     }
 
     /** Creates the datamart with the schema and the books of the table above. */
-    static Path create(Path dbFile) throws SQLException {
+    public static Path create(Path dbFile) throws SQLException {
         run(dbFile, STATEMENTS);
         run(dbFile, DATA);
         return dbFile;
     }
 
     /** Creates a datamart with the schema but no books, as Indexing leaves it before the first book. */
-    static Path createEmpty(Path dbFile) throws SQLException {
+    public static Path createEmpty(Path dbFile) throws SQLException {
         run(dbFile, STATEMENTS);
         return dbFile;
     }
