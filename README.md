@@ -16,8 +16,8 @@ complemented by internal HTTP endpoints. The shared rules (data ownership, SQLit
 tokenizer, corpus) are in [`docs/contracts.md`](docs/contracts.md), and every HTTP endpoint is
 specified in [`docs/openapi.yaml`](docs/openapi.yaml) (OpenAPI 3.0).
 
-> **Status:** base setup. Every service builds, starts and answers `GET /health`; the business
-> endpoints and the broker are being added on top of this base.
+> **Status:** in progress. The broker and the Search API are implemented; the ingestion and
+> indexing endpoints are being added.
 
 ## Repository layout
 
@@ -62,6 +62,20 @@ java -jar search-service/target/search-service.jar
 
 curl http://localhost:7003/health     # {"service":"search-service","status":"UP"}
 ```
+
+Search API examples (full contract in [`docs/openapi.yaml`](docs/openapi.yaml)):
+
+```bash
+curl "http://localhost:7003/search?q=monster&limit=3"
+curl "http://localhost:7003/search?q=adventure&author=twain&language=en&year=2004"
+curl "http://localhost:7003/books/1342"
+curl "http://localhost:7003/search/filters"
+```
+
+The Search Service starts even if the datamart or the broker are not available yet: searches
+answer `503 UNAVAILABLE` until Indexing has created the datamart, and the subscription to
+`BookIndexed` events connects (and reconnects) in the background. CORS is enabled for any origin,
+so a browser front-end on another origin can call it directly.
 
 ## Configuration
 

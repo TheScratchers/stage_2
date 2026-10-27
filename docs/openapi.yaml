@@ -35,9 +35,10 @@ info:
     ## Cross-origin access
 
     A browser front-end served from another origin calls the Search Service directly on port 7003.
-    The Search Service enables CORS for any origin (`Access-Control-Allow-Origin: *`) on its
-    front-end routes; only `GET` requests are exposed to browsers, without credentials. Ingestion
-    and Indexing routes are not meant for browsers and do not enable CORS.
+    The Search Service enables CORS for any origin on all its routes: when a request carries an
+    `Origin` header, the response includes `Access-Control-Allow-Origin: *`, and preflight
+    `OPTIONS` requests are answered. Credentials are not allowed, and the API only exposes `GET`
+    operations. Ingestion and Indexing routes are not meant for browsers and do not enable CORS.
 
 servers:
   - url: http://localhost:7003
@@ -244,8 +245,12 @@ paths:
       description: |
         Lists the languages and release years present in the index, with the number of books for
         each, so that the front-end can offer them as filter choices. Authors are free text
-        (substring match) and are therefore not listed. The Search Service refreshes these values
-        when it receives a `BookIndexed` event.
+        (substring match) and are therefore not listed.
+
+        **Freshness.** The values are cached in memory while the Search Service is subscribed to
+        the `books.indexed` topic, and every `BookIndexed` event drops the cache. While the broker is
+        unreachable the cache is disabled and every request reads the datamart, so the values are
+        never older than the last committed book.
       x-provider: Search Service
       x-consumers: [Search front-end, api-tests]
       responses:
@@ -384,7 +389,7 @@ components:
 
   headers:
     AccessControlAllowOrigin:
-      description: CORS header; front-end routes can be called from any origin.
+      description: CORS header, present when the request carries an `Origin` header.
       schema:
         type: string
         example: '*'
