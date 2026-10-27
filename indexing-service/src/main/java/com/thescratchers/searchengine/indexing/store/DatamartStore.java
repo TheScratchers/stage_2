@@ -3,6 +3,8 @@ package com.thescratchers.searchengine.indexing.store;
 import com.thescratchers.searchengine.common.BookRecord;
 import com.thescratchers.searchengine.common.Sqlite;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -56,6 +58,10 @@ public final class DatamartStore {
             "SELECT book_id FROM postings WHERE term = ? ORDER BY book_id";
     private static final String COUNT_BOOKS = "SELECT COUNT(*) FROM books";
     private static final String COUNT_POSTINGS = "SELECT COUNT(*) FROM postings WHERE book_id = ?";
+    private static final String SELECT_BOOK_IDS = "SELECT book_id FROM books ORDER BY book_id";
+    private static final String DELETE_BOOK = "DELETE FROM books WHERE book_id = ?";
+    private static final String SELECT_LAST_UPDATE = "SELECT value FROM index_meta WHERE key = 'last_update'";
+    private static final String WAL_SUFFIX = "-wal";
 
     private final Path dbFile;
 
@@ -128,6 +134,39 @@ public final class DatamartStore {
         }
     }
 
+    /**
+     * Removes a book and its postings in a single transaction and updates
+     * {@code index_meta.last_update}. Removing a book that is not indexed changes nothing else.
+     *
+     * @return {@code true} if the book was indexed and has been removed
+     * @throws SQLException if the transaction fails; it has been rolled back
+     */
+    public boolean deleteBook(int bookId) throws SQLException {
+        try (Connection conn = Sqlite.open(dbFile)) {
+            conn.setAutoCommit(false);
+            try {
+                try (PreparedStatement delete = conn.prepareStatement(DELETE_POSTINGS)) {
+                    delete.setInt(1, bookId);
+                    delete.executeUpdate();
+                }
+                int removed;
+                try (PreparedStatement delete = conn.prepareStatement(DELETE_BOOK)) {
+                    delete.setInt(1, bookId);
+                    removed = delete.executeUpdate();
+                }
+                try (PreparedStatement meta = conn.prepareStatement(UPSERT_LAST_UPDATE)) {
+                    meta.setString(1, Instant.now().toString());
+                    meta.executeUpdate();
+                }
+                conn.commit();
+                return removed > 0;
+            } catch (SQLException | RuntimeException e) {
+                conn.rollback();
+                throw e;
+            }
+        }
+    }
+
     /** Returns the metadata of a book, or empty if it has not been indexed. */
     public Optional<BookRecord> findBook(int bookId) throws SQLException {
         try (Connection conn = Sqlite.open(dbFile);
@@ -171,6 +210,45 @@ public final class DatamartStore {
              ResultSet rs = stmt.executeQuery()) {
             return rs.next() ? rs.getInt(1) : 0;
         }
+    }
+
+    /** Returns the ids of every indexed book, ordered by book id. */
+    public List<Integer> bookIds() throws SQLException {
+        List<Integer> bookIds = new ArrayList<>();
+        try (Connection conn = Sqlite.open(dbFile);
+             PreparedStatement stmt = conn.prepareStatement(SELECT_BOOK_IDS);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                bookIds.add(rs.getInt(1));
+            }
+        }
+        return bookIds;
+    }
+
+    /** Returns the time of the last committed change to the index, or empty if there has been none. */
+    public Optional<String> lastUpdate() throws SQLException {
+        try (Connection conn = Sqlite.open(dbFile);
+             PreparedStatement stmt = conn.prepareStatement(SELECT_LAST_UPDATE);
+             ResultSet rs = stmt.executeQuery()) {
+            return rs.next() ? Optional.ofNullable(rs.getString(1)) : Optional.empty();
+        }
+    }
+
+    /**
+     * Returns the bytes the datamart occupies on disk: the database file plus its write-ahead log,
+     * which holds committed pages until SQLite checkpoints them into the database file.
+     *
+     * @throws IOException if the size of an existing file cannot be read
+     */
+    public long sizeBytes() throws IOException {
+        Path wal = dbFile.resolveSibling(dbFile.getFileName() + WAL_SUFFIX);
+        long size = 0;
+        for (Path file : List.of(dbFile, wal)) {
+            if (Files.exists(file)) {
+                size += Files.size(file);
+            }
+        }
+        return size;
     }
 
     /** Returns the number of postings (distinct terms) stored for a book. */
