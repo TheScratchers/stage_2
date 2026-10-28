@@ -24,7 +24,7 @@ info:
     | Group (tag) | Consumers | Endpoints |
     |---|---|---|
     | Search (front-end) | Search front-end, API checks in `api-tests/`, search benchmarks | `GET /search`, `GET /books/{book_id}`, `GET /search/filters` |
-    | Ingestion (internal) | Start-up and corpus-loading scripts, administrators | Added by the Ingestion Service owner |
+    | Ingestion (internal) | Start-up and corpus-loading scripts, administrators | `POST /ingest/{book_id}`, `GET /ingest/status/{book_id}`, `GET /ingest/list` |
     | Indexing (internal) | Administrators, recovery procedures | Added by the Indexing Service owner |
     | Operations | Start-up scripts, integration tests, benchmarks, monitoring | `GET /health` (all services) |
 
@@ -285,6 +285,89 @@ paths:
         '503':
           $ref: '#/components/responses/IndexUnavailable'
 
+  /ingest/{book_id}:
+    servers:
+      - url: http://localhost:7001
+        description: Ingestion Service
+    post:
+      tags: [Ingestion (internal)]
+      operationId: ingestBook
+      summary: Download a book from Project Gutenberg and store it in the datalake
+      description: |
+        Downloads `/cache/epub/{book_id}/pg{book_id}.txt` from Project Gutenberg, splits it into
+        header and body files, stores them atomically in the datalake, records the book as available
+        in `datalake/ingestion.db` and publishes a `BookDownloaded` event to ActiveMQ.
+
+        **Idempotency.** If the book is already available in the datalake, it is not downloaded again;
+        the endpoint responds `200 OK` with `status: already_available`.
+      x-provider: Ingestion Service
+      x-consumers: [Start-up and corpus-loading scripts, administrators]
+      parameters:
+        - $ref: '#/components/parameters/BookId'
+      responses:
+        '200':
+          description: Book successfully ingested or already available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestResponse'
+        '400':
+          $ref: '#/components/responses/InvalidParameter'
+        '502':
+          $ref: '#/components/responses/UpstreamError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /ingest/status/{book_id}:
+    servers:
+      - url: http://localhost:7001
+        description: Ingestion Service
+    get:
+      tags: [Ingestion (internal)]
+      operationId: getIngestStatus
+      summary: Check ingestion status of a specific book
+      description: |
+        Returns whether a specific book has been successfully downloaded (`available`) or failed
+        during previous ingestion attempts.
+      x-provider: Ingestion Service
+      x-consumers: [Start-up and corpus-loading scripts, administrators]
+      parameters:
+        - $ref: '#/components/parameters/BookId'
+      responses:
+        '200':
+          description: Book status found in the ingestion log.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestStatusResponse'
+        '400':
+          $ref: '#/components/responses/InvalidParameter'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /ingest/list:
+    servers:
+      - url: http://localhost:7001
+        description: Ingestion Service
+    get:
+      tags: [Ingestion (internal)]
+      operationId: listIngestedBooks
+      summary: List all downloaded books currently stored in the datalake
+      description: Returns the IDs of all books currently recorded with `status = 'available'`.
+      x-provider: Ingestion Service
+      x-consumers: [Start-up and corpus-loading scripts, administrators]
+      responses:
+        '200':
+          description: List of available book IDs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestListResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /health:
     servers:
       - url: http://localhost:7001
@@ -442,6 +525,24 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
           example:
             error: {code: INTERNAL_ERROR, message: unexpected error}
+    NotFound:
+      description: The requested resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: {code: NOT_FOUND, message: Book 9999 has not been ingested}
+    UpstreamError:
+      description: |
+        The upstream Project Gutenberg server returned an error, could not be reached, or the
+        downloaded text was missing expected Gutenberg START/END markers.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: {code: UPSTREAM_ERROR, message: Project Gutenberg returned HTTP 500}
 
   schemas:
     ErrorResponse:
@@ -592,3 +693,51 @@ components:
           format: date-time
           nullable: true
           description: Last update of the index (`index_meta.last_update`); null while it is empty.
+
+    IngestResponse:
+      type: object
+      required: [book_id, status, path]
+      properties:
+        book_id:
+          type: integer
+          minimum: 1
+        status:
+          type: string
+          enum: [downloaded, already_available]
+        path:
+          type: string
+          description: Base path in the datalake without file extensions.
+      example:
+        book_id: 1342
+        status: downloaded
+        path: datalake/20261026/17/1342
+
+    IngestStatusResponse:
+      type: object
+      required: [book_id, status]
+      properties:
+        book_id:
+          type: integer
+          minimum: 1
+        status:
+          type: string
+          enum: [available, failed]
+      example:
+        book_id: 1342
+        status: available
+
+    IngestListResponse:
+      type: object
+      required: [count, books]
+      properties:
+        count:
+          type: integer
+          minimum: 0
+        books:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+      example:
+        count: 2
+        books: [11, 1342]
