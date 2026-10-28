@@ -135,4 +135,45 @@ class DatamartStoreTest {
         assertEquals(List.of(), store.booksForTerm("wickham"));
         assertEquals(1, store.countPostings(1342));
     }
+
+    @Test
+    void lastUpdateIsEmptyUntilTheFirstCommit() throws SQLException {
+        DatamartStore store = new DatamartStore(tempDir.resolve("datamart.db"));
+        assertTrue(store.lastUpdate().isEmpty());
+
+        store.indexBook(BOOK, Map.of("darcy", 3));
+
+        assertTrue(store.lastUpdate().isPresent());
+    }
+
+    @Test
+    void deletingABookRemovesItsRowAndPostingsOnly() throws SQLException {
+        DatamartStore store = new DatamartStore(tempDir.resolve("datamart.db"));
+        store.indexBook(BOOK, Map.of("darcy", 3, "love", 2));
+        store.indexBook(new BookRecord(11, "Alice", "Lewis Carroll", "en", 2008), Map.of("love", 1));
+
+        assertTrue(store.deleteBook(1342));
+
+        assertEquals(List.of(11), store.bookIds());
+        assertEquals(0, store.countPostings(1342));
+        assertEquals(List.of(11), store.booksForTerm("love"));
+    }
+
+    @Test
+    void deletingAnUnknownBookReportsFalse() throws SQLException {
+        DatamartStore store = new DatamartStore(tempDir.resolve("datamart.db"));
+
+        assertFalse(store.deleteBook(1342));
+    }
+
+    @Test
+    void sizeCountsTheDatabaseFile() throws Exception {
+        DatamartStore store = new DatamartStore(tempDir.resolve("datamart.db"));
+        long empty = store.sizeBytes();
+
+        store.indexBook(BOOK, Map.of("darcy", 3, "elizabeth", 5));
+
+        assertTrue(empty > 0);
+        assertTrue(store.sizeBytes() >= empty);
+    }
 }
