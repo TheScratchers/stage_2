@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import com.thescratchers.searchengine.indexing.BookIndexer;
 import com.thescratchers.searchengine.indexing.IndexingApp;
 import com.thescratchers.searchengine.indexing.IngestionLogFixture;
+import com.thescratchers.searchengine.indexing.service.IndexListener;
 import com.thescratchers.searchengine.indexing.service.IndexingService;
 import com.thescratchers.searchengine.indexing.source.IngestionLogReader;
 import com.thescratchers.searchengine.indexing.store.DatamartStore;
@@ -37,7 +38,7 @@ class IndexingControllerTest {
         Path ingestionDb = tempDir.resolve("ingestion.db");
         log = new IngestionLogFixture(ingestionDb);
         DatamartStore store = new DatamartStore(tempDir.resolve("datamart.db"));
-        IndexingService service = new IndexingService(new IngestionLogReader(ingestionDb), new BookIndexer(store), store);
+        IndexingService service = new IndexingService(new IngestionLogReader(ingestionDb), new BookIndexer(store), store, IndexListener.NONE);
         app = IndexingApp.start(0, service);
     }
 
