@@ -3,8 +3,6 @@ package com.thescratchers.searchengine.ingestion.datalake;
 import com.thescratchers.searchengine.common.Config;
 import com.thescratchers.searchengine.common.Sqlite;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,6 +13,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -43,9 +42,6 @@ public final class IngestionLogStore {
     private static final String SELECT_AVAILABLE_IDS =
             "SELECT book_id FROM ingestion_log WHERE status = 'available' ORDER BY book_id ASC";
 
-    private static final String COUNT_AVAILABLE =
-            "SELECT COUNT(*) FROM ingestion_log WHERE status = 'available'";
-
     private final Path dbFile;
 
     /**
@@ -55,14 +51,7 @@ public final class IngestionLogStore {
      * @throws SQLException if opening SQLite or executing the DDL fails
      */
     public IngestionLogStore(Path dbFile) throws SQLException {
-        this.dbFile = dbFile;
-        try {
-            if (dbFile.getParent() != null) {
-                Files.createDirectories(dbFile.getParent());
-            }
-        } catch (IOException e) {
-            throw new SQLException("Failed to create parent directory for " + dbFile, e);
-        }
+        this.dbFile = Objects.requireNonNull(dbFile, "dbFile");
         try (Connection conn = Sqlite.open(dbFile);
              Statement stmt = conn.createStatement()) {
             stmt.execute(DDL);
@@ -78,8 +67,8 @@ public final class IngestionLogStore {
      * Records or updates a book as {@code 'available'}.
      *
      * @param bookId     Project Gutenberg book id
-     * @param headerPath relative path to the header file
-     * @param bodyPath   relative path to the body file
+     * @param headerPath absolute path to the header file
+     * @param bodyPath   absolute path to the body file
      * @param ingestedAt timestamp of successful ingestion
      * @throws SQLException if the database write fails
      */
@@ -139,11 +128,6 @@ public final class IngestionLogStore {
         }
     }
 
-    /** Returns {@code true} if {@code bookId} is recorded with status {@code 'available'}. */
-    public boolean isAvailable(int bookId) throws SQLException {
-        return findById(bookId).map(IngestionRecord::isAvailable).orElse(false);
-    }
-
     /** Returns all book IDs currently marked as {@code 'available'}, ordered ascending. */
     public List<Integer> listAvailable() throws SQLException {
         try (Connection conn = Sqlite.open(dbFile);
@@ -156,21 +140,5 @@ public final class IngestionLogStore {
             return Collections.unmodifiableList(list);
         }
     }
-
-    /** Returns the total count of books marked as {@code 'available'}. */
-    public int countAvailable() throws SQLException {
-        try (Connection conn = Sqlite.open(dbFile);
-             PreparedStatement ps = conn.prepareStatement(COUNT_AVAILABLE);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        }
-    }
-
-    /** Returns the file path of this store's database. */
-    public Path dbFile() {
-        return dbFile;
-    }
 }
+

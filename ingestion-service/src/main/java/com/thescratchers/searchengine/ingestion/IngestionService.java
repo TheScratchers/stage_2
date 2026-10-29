@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -29,17 +30,18 @@ public final class IngestionService {
     private final BookDownloadedPublisher publisher;
 
     public IngestionService(BookDownloader downloader, IngestionLogStore store, BookDownloadedPublisher publisher) {
-        this.downloader = downloader;
-        this.store = store;
-        this.publisher = publisher;
+        this.downloader = Objects.requireNonNull(downloader, "downloader");
+        this.store = Objects.requireNonNull(store, "store");
+        this.publisher = Objects.requireNonNull(publisher, "publisher");
     }
 
     /**
-     * Ingests {@code bookId} into the datalake if not already available.
+     * Ingests {@code bookId} into the datalake if not already available, and publishes the event to the broker.
      *
      * <p>If the book is already marked {@code 'available'} in the store, no download is performed and
-     * {@link IngestResult#STATUS_ALREADY_AVAILABLE} is returned (idempotency). Otherwise, it downloads
-     * the text, writes header/body atomically, records {@code 'available'} in SQLite, and publishes
+     * the {@link BookDownloadedEvent} is re-published to ensure downstream indexing before returning
+     * {@link IngestResult#STATUS_ALREADY_AVAILABLE}. Otherwise, it downloads the text, writes header/body
+     * atomically, records {@code 'available'} in SQLite with absolute paths, and publishes
      * a {@code BookDownloaded} event to ActiveMQ.
      *
      * @param bookId Project Gutenberg book id
@@ -48,37 +50,31 @@ public final class IngestionService {
      * @throws DownloadException        if downloading or splitting from Gutenberg fails
      * @throws IOException              if storing files to disk fails
      * @throws SQLException             if database operations fail
+     * @throws JMSException             if publishing to the message broker fails
      */
-    public IngestResult ingest(int bookId) throws DownloadException, IOException, SQLException {
+    public IngestResult ingest(int bookId) throws DownloadException, IOException, SQLException, JMSException {
         if (bookId <= 0) {
             throw new IllegalArgumentException("book_id must be a positive integer but was " + bookId);
         }
 
         Optional<IngestionRecord> existing = store.findById(bookId);
         if (existing.isPresent() && existing.get().isAvailable()) {
-            LOG.info("Book {} is already available in the datalake; skipping download", bookId);
-            String path = toPrefixPath(existing.get().headerPath(), bookId);
+            LOG.info("Book {} is already available in the datalake; skipping download and publishing event", bookId);
+            IngestionRecord record = existing.get();
+            publisher.publish(BookDownloadedEvent.of(bookId, record.headerPath(), record.bodyPath(), record.ingestedAt()));
+            String path = toPrefixPath(record.headerPath(), bookId);
             return new IngestResult(bookId, IngestResult.STATUS_ALREADY_AVAILABLE, path);
         }
 
         try {
             StoredBook stored = downloader.download(bookId);
-            String headerPath = stored.headerFile().toString();
-            String bodyPath = stored.bodyFile().toString();
-            String prefixPath = stored.directory().resolve(String.valueOf(bookId)).toString();
+            String headerPath = stored.headerFile().toAbsolutePath().normalize().toString();
+            String bodyPath = stored.bodyFile().toAbsolutePath().normalize().toString();
+            String prefixPath = stored.directory().resolve(String.valueOf(bookId)).toAbsolutePath().normalize().toString();
 
             store.recordAvailable(bookId, headerPath, bodyPath, stored.ingestedAt());
 
-            if (publisher != null) {
-                try {
-                    publisher.publish(BookDownloadedEvent.of(bookId, headerPath, bodyPath, stored.ingestedAt()));
-                } catch (JMSException e) {
-                    LOG.error("Failed to publish BookDownloaded event for book {}", bookId, e);
-                    // Do not fail the ingestion if message broker publish fails, or should we?
-                    // According to Section 5.10: "Un libro solo está listo para indexar a partir de este punto."
-                    // If publishing fails, we log the error; the book remains available in ingestion_log.
-                }
-            }
+            publisher.publish(BookDownloadedEvent.of(bookId, headerPath, bodyPath, stored.ingestedAt()));
 
             return new IngestResult(bookId, IngestResult.STATUS_DOWNLOADED, prefixPath);
         } catch (DownloadException e) {
@@ -101,11 +97,6 @@ public final class IngestionService {
         return store.listAvailable();
     }
 
-    /** Returns the total count of books currently marked as {@code 'available'}. */
-    public int countAvailable() throws SQLException {
-        return store.countAvailable();
-    }
-
     private static String toPrefixPath(String headerPath, int bookId) {
         if (headerPath != null && headerPath.endsWith(".header.txt")) {
             return headerPath.substring(0, headerPath.length() - ".header.txt".length());
@@ -113,3 +104,4 @@ public final class IngestionService {
         return "datalake/" + bookId;
     }
 }
+

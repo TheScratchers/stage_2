@@ -294,7 +294,8 @@ paths:
         in `datalake/ingestion.db` and publishes a `BookDownloaded` event to ActiveMQ.
 
         **Idempotency.** If the book is already available in the datalake, it is not downloaded again;
-        the endpoint responds `200 OK` with `status: already_available`.
+        the endpoint re-publishes the `BookDownloaded` event to ensure the indexer receives it and
+        responds `200 OK` with `status: already_available`.
       x-provider: Ingestion Service
       x-consumers: [Start-up and corpus-loading scripts, administrators]
       parameters:
@@ -310,6 +311,8 @@ paths:
           $ref: '#/components/responses/InvalidParameter'
         '502':
           $ref: '#/components/responses/UpstreamError'
+        '503':
+          $ref: '#/components/responses/BrokerUnavailable'
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -502,6 +505,16 @@ components:
               summary: book_id is not a positive integer (GET /books/abc)
               value:
                 error: {code: INVALID_PARAMETER, message: book_id must be a positive integer}
+    BrokerUnavailable:
+      description: |
+        The message broker (ActiveMQ) is unreachable or failed to accept the `BookDownloaded`
+        event. The book remains safely stored in the datalake and the request can be retried.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: {code: UNAVAILABLE, message: Message broker is unavailable}
     IndexUnavailable:
       description: |
         The datamart does not exist yet or cannot be opened, for example before the Indexing
@@ -701,11 +714,11 @@ components:
           enum: [downloaded, already_available]
         path:
           type: string
-          description: Base path in the datalake without file extensions.
+          description: Absolute base path in the datalake without file extensions.
       example:
         book_id: 1342
         status: downloaded
-        path: datalake/20261026/17/1342
+        path: /data/datalake/20261026/17/1342
 
     IngestStatusResponse:
       type: object

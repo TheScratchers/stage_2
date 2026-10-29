@@ -1,6 +1,8 @@
 package com.thescratchers.searchengine.ingestion;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.thescratchers.searchengine.common.Config;
 import com.thescratchers.searchengine.ingestion.broker.BookDownloadedPublisher;
 import com.thescratchers.searchengine.ingestion.datalake.IngestionLogStore;
@@ -29,7 +31,9 @@ public final class IngestionApp {
     public static final String SERVICE_NAME = "ingestion-service";
 
     private static final Logger LOG = LoggerFactory.getLogger(IngestionApp.class);
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder()
+            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .create();
 
     private IngestionApp() {
     }
@@ -92,9 +96,15 @@ public final class IngestionApp {
         } catch (DownloadException e) {
             LOG.warn("Upstream error while ingesting book {}: {}", bookId, e.getMessage());
             ctx.status(502).result(GSON.toJson(error("UPSTREAM_ERROR", e.getMessage())));
+        } catch (JMSException e) {
+            LOG.error("Broker unavailable while publishing BookDownloaded for book {}: {}", bookId, e.getMessage());
+            ctx.status(503).result(GSON.toJson(error("UNAVAILABLE", "Message broker is unavailable")));
         } catch (IOException | SQLException e) {
             LOG.error("Internal error while ingesting book {}", bookId, e);
-            ctx.status(500).result(GSON.toJson(error("INTERNAL_ERROR", e.getMessage())));
+            ctx.status(500).result(GSON.toJson(error("INTERNAL_ERROR", "Internal server error")));
+        } catch (Exception e) {
+            LOG.error("Unexpected error while ingesting book {}", bookId, e);
+            ctx.status(500).result(GSON.toJson(error("INTERNAL_ERROR", "Internal server error")));
         }
     }
 
@@ -114,7 +124,10 @@ public final class IngestionApp {
             }
         } catch (SQLException e) {
             LOG.error("Internal error fetching status for book {}", bookId, e);
-            ctx.status(500).result(GSON.toJson(error("INTERNAL_ERROR", e.getMessage())));
+            ctx.status(500).result(GSON.toJson(error("INTERNAL_ERROR", "Internal server error")));
+        } catch (Exception e) {
+            LOG.error("Unexpected error fetching status for book {}", bookId, e);
+            ctx.status(500).result(GSON.toJson(error("INTERNAL_ERROR", "Internal server error")));
         }
     }
 
@@ -128,7 +141,10 @@ public final class IngestionApp {
             ctx.status(200).result(GSON.toJson(response));
         } catch (SQLException e) {
             LOG.error("Internal error listing ingested books", e);
-            ctx.status(500).result(GSON.toJson(error("INTERNAL_ERROR", e.getMessage())));
+            ctx.status(500).result(GSON.toJson(error("INTERNAL_ERROR", "Internal server error")));
+        } catch (Exception e) {
+            LOG.error("Unexpected error listing ingested books", e);
+            ctx.status(500).result(GSON.toJson(error("INTERNAL_ERROR", "Internal server error")));
         }
     }
 
@@ -148,12 +164,8 @@ public final class IngestionApp {
     private static IngestionService createDefaultService() throws SQLException {
         BookDownloader downloader = BookDownloader.fromConfig();
         IngestionLogStore store = IngestionLogStore.fromConfig();
-        BookDownloadedPublisher publisher = null;
-        try {
-            publisher = BookDownloadedPublisher.fromConfig();
-        } catch (JMSException e) {
-            LOG.warn("ActiveMQ broker is unreachable at startup; BookDownloaded events will not be published until reconnected", e);
-        }
+        BookDownloadedPublisher publisher = BookDownloadedPublisher.fromConfig();
         return new IngestionService(downloader, store, publisher);
     }
 }
+

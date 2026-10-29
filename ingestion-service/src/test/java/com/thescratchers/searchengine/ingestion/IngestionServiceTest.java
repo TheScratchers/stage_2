@@ -4,10 +4,12 @@ import com.thescratchers.searchengine.ingestion.broker.BookDownloadedPublisher;
 import com.thescratchers.searchengine.ingestion.datalake.DatalakeLayout;
 import com.thescratchers.searchengine.ingestion.datalake.DatalakeWriter;
 import com.thescratchers.searchengine.ingestion.datalake.IngestionLogStore;
+import com.thescratchers.searchengine.ingestion.datalake.IngestionRecord;
 import com.thescratchers.searchengine.ingestion.gutenberg.DownloadException;
 import com.thescratchers.searchengine.ingestion.gutenberg.GutenbergClient;
 import io.javalin.Javalin;
 import jakarta.jms.Connection;
+import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.MessageConsumer;
 import jakarta.jms.Queue;
@@ -40,6 +42,7 @@ class IngestionServiceTest {
     Path tempDir;
 
     private Javalin fakeGutenberg;
+    private BookDownloader downloader;
     private IngestionLogStore store;
     private BookDownloadedPublisher publisher;
     private ActiveMQConnectionFactory brokerFactory;
@@ -55,7 +58,7 @@ class IngestionServiceTest {
 
         GutenbergClient client = new GutenbergClient("http://localhost:" + fakeGutenberg.port(), Duration.ofSeconds(2));
         DatalakeWriter writer = new DatalakeWriter(tempDir.resolve("datalake"), DatalakeLayout.TIME_BASED);
-        BookDownloader downloader = new BookDownloader(client, writer, Clock.fixed(NOW, ZoneOffset.UTC));
+        downloader = new BookDownloader(client, writer, Clock.fixed(NOW, ZoneOffset.UTC));
 
         store = new IngestionLogStore(tempDir.resolve("datalake/ingestion.db"));
 
@@ -79,15 +82,19 @@ class IngestionServiceTest {
     void testIngestNewBookPublishesEventAndRecordsStore() throws Exception {
         IngestResult result = service.ingest(1342);
 
-        assertEquals(1342, result.book_id());
+        assertEquals(1342, result.bookId());
         assertEquals(IngestResult.STATUS_DOWNLOADED, result.status());
         assertTrue(result.path().contains("1342"));
+        assertTrue(Path.of(result.path()).isAbsolute(), "Result path must be absolute");
 
         // Store verification
-        assertTrue(store.isAvailable(1342));
+        Optional<IngestionRecord> record = store.findById(1342);
+        assertTrue(record.isPresent());
+        assertTrue(record.get().isAvailable());
+        assertTrue(Path.of(record.get().headerPath()).isAbsolute(), "Header path in DB must be absolute");
+        assertTrue(Path.of(record.get().bodyPath()).isAbsolute(), "Body path in DB must be absolute");
         assertEquals(Optional.of("available"), service.getStatus(1342));
         assertEquals(List.of(1342), service.listAvailable());
-        assertEquals(1, service.countAvailable());
 
         // Broker verification
         try (Connection conn = brokerFactory.createConnection()) {
@@ -101,22 +108,63 @@ class IngestionServiceTest {
                     String body = ((TextMessage) msg).getText();
                     assertTrue(body.contains("\"event\":\"BookDownloaded\""));
                     assertTrue(body.contains("\"book_id\":1342"));
+                    assertTrue(body.contains("\"header_path\":\"" + record.get().headerPath().replace("\\", "\\\\") + "\"")
+                            || body.contains(record.get().headerPath()));
                 }
             }
         }
     }
 
     @Test
-    void testIngestAlreadyAvailableIsIdempotent() throws Exception {
+    void testIngestAlreadyAvailableIsIdempotentAndRepublishesEvent() throws Exception {
         // First ingest
         IngestResult first = service.ingest(1342);
         assertEquals(IngestResult.STATUS_DOWNLOADED, first.status());
 
-        // Second ingest (should be idempotent, no re-download)
-        IngestResult second = service.ingest(1342);
-        assertEquals(1342, second.book_id());
-        assertEquals(IngestResult.STATUS_ALREADY_AVAILABLE, second.status());
-        assertEquals(first.path(), second.path());
+        // Consume the first event from broker
+        try (Connection conn = brokerFactory.createConnection()) {
+            conn.start();
+            try (Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE)) {
+                Queue queue = session.createQueue(BookDownloadedPublisher.QUEUE_NAME);
+                try (MessageConsumer consumer = session.createConsumer(queue)) {
+                    Message msg1 = consumer.receive(2000);
+                    assertNotNull(msg1, "First event should be on broker");
+
+                    // Second ingest (should be idempotent: no re-download, but re-publishes event)
+                    IngestResult second = service.ingest(1342);
+                    assertEquals(1342, second.bookId());
+                    assertEquals(IngestResult.STATUS_ALREADY_AVAILABLE, second.status());
+                    assertEquals(first.path(), second.path());
+
+                    // Verify second event was published
+                    Message msg2 = consumer.receive(2000);
+                    assertNotNull(msg2, "Re-ingestion must republish the BookDownloaded event");
+                    assertTrue(((TextMessage) msg2).getText().contains("\"book_id\":1342"));
+                }
+            }
+        }
+    }
+
+    @Test
+    void testIngestBrokerFailureSavesInStoreAndThrowsJMSException() throws Exception {
+        ActiveMQConnectionFactory brokenFactory = new ActiveMQConnectionFactory("tcp://localhost:60001?timeout=500");
+        BookDownloadedPublisher brokenPublisher = new BookDownloadedPublisher(brokenFactory);
+        IngestionService serviceWithBrokenBroker = new IngestionService(downloader, store, brokenPublisher);
+
+        try {
+            assertThrows(JMSException.class, () -> serviceWithBrokenBroker.ingest(1342));
+
+            // Book must remain available in store despite broker publish failure
+            Optional<IngestionRecord> record = store.findById(1342);
+            assertTrue(record.isPresent(), "Book must be saved in ingestion_log even if broker fails");
+            assertTrue(record.get().isAvailable());
+
+            // When publisher is repaired, ingesting again successfully publishes the event
+            IngestResult retry = service.ingest(1342);
+            assertEquals(IngestResult.STATUS_ALREADY_AVAILABLE, retry.status());
+        } finally {
+            brokenPublisher.close();
+        }
     }
 
     @Test
@@ -131,6 +179,7 @@ class IngestionServiceTest {
         assertThrows(DownloadException.class, () -> service.ingest(5));
 
         assertEquals(Optional.of("failed"), service.getStatus(5));
-        assertEquals(0, service.countAvailable());
+        assertTrue(service.listAvailable().isEmpty());
     }
 }
+

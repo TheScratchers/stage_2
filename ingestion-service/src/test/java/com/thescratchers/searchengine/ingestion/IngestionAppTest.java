@@ -145,4 +145,38 @@ class IngestionAppTest {
         assertEquals(404, resp.statusCode());
         assertTrue(resp.body().contains("NOT_FOUND"));
     }
+
+    @Test
+    void testPostIngestBrokerUnavailableReturns503AndSavesBook() throws Exception {
+        ActiveMQConnectionFactory brokenBroker = new ActiveMQConnectionFactory("tcp://localhost:60001?timeout=500");
+        BookDownloadedPublisher brokenPublisher = new BookDownloadedPublisher(brokenBroker);
+        GutenbergClient client = new GutenbergClient("http://localhost:" + fakeGutenberg.port(), Duration.ofSeconds(2));
+        DatalakeWriter writer = new DatalakeWriter(tempDir.resolve("datalake_broken"), DatalakeLayout.TIME_BASED);
+        BookDownloader downloader = new BookDownloader(client, writer, Clock.fixed(NOW, ZoneOffset.UTC));
+        IngestionLogStore store = new IngestionLogStore(tempDir.resolve("datalake_broken/ingestion.db"));
+        IngestionService brokenService = new IngestionService(downloader, store, brokenPublisher);
+
+        Javalin appWithBrokenBroker = IngestionApp.start(0, brokenService);
+        try {
+            HttpRequest req = HttpRequest.newBuilder(URI.create("http://localhost:" + appWithBrokenBroker.port() + "/ingest/1342"))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .build();
+            HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+
+            assertEquals(503, resp.statusCode());
+            assertTrue(resp.body().contains("UNAVAILABLE"));
+            assertTrue(resp.body().contains("Message broker is unavailable"));
+
+            // Book must be saved as available in store
+            HttpRequest statusReq = HttpRequest.newBuilder(URI.create("http://localhost:" + appWithBrokenBroker.port() + "/ingest/status/1342"))
+                    .GET()
+                    .build();
+            HttpResponse<String> statusResp = http.send(statusReq, HttpResponse.BodyHandlers.ofString());
+            assertEquals(200, statusResp.statusCode());
+            assertTrue(statusResp.body().contains("\"status\":\"available\""));
+        } finally {
+            appWithBrokenBroker.stop();
+            brokenPublisher.close();
+        }
+    }
 }
