@@ -30,6 +30,7 @@ stage_2/
 ├── indexing-service/     # com.thescratchers.searchengine.indexing
 ├── search-service/       # com.thescratchers.searchengine.search
 ├── api-tests/            # data-driven HTTP checks of the APIs and their expected results
+├── benchmarks/           # load-client/ (HTTP load generator) and results/ of the integration benchmarks
 ├── samples/              # fixed corpus: books.txt, words.txt and the 20 books split in books/
 └── docs/
     ├── contracts.md      # shared contracts between services
@@ -122,6 +123,12 @@ JMH benchmarks live in `src/test/java/.../benchmark/` of each service. To run th
 mvn -q install -DskipTests
 mvn -pl indexing-service -Pjmh test-compile exec:exec -Djmh.args="-rf csv -rff jmh-results.csv"
 ```
+
+## Integration benchmarks
+
+`benchmarks/load-client` sends concurrent searches to one or more Search replicas and records
+every request, the p50/p95/p99 latencies per concurrency level, the exact command and the host
+description. See [`benchmarks/README.md`](benchmarks/README.md).
 
 ## Technology versions
 

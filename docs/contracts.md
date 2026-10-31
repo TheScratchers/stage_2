@@ -27,11 +27,12 @@ Each service creates its directories at startup, before opening SQLite.
 | Path (under `DATA_DIR`) | Writer | Readers | Content |
 |---|---|---|---|
 | `datalake/yyyyMMdd/HH/<id>.header.txt`, `<id>.body.txt` | Ingestion | Indexing | Book split into header and body (Stage 1 time-based layout, UTC ingestion hour). Consumers must use the paths published in events / `ingestion_log`, never rebuild them. |
-| `datalake/ingestion.db` | Ingestion | Ingestion | `ingestion_log`: persistent record of books ready for indexing |
+| `datalake/ingestion.db` | Ingestion | Ingestion, Indexing (read-only) | `ingestion_log`: persistent record of books ready for indexing. Indexing reads it only to find the paths of `available` books for `POST /index/update/{book_id}` and `POST /index/rebuild`. |
 | `datamarts/datamart.db` | Indexing | Search (read-only) | `books`, `postings`, `index_meta` |
 
 All SQLite databases are opened through `common.Sqlite` with `journal_mode=WAL`,
-`synchronous=NORMAL` and `busy_timeout=5000`. Search opens the datamart read-only.
+`synchronous=NORMAL` and `busy_timeout=5000`. Search opens the datamart read-only, and Indexing
+opens `ingestion.db` read-only.
 Connections are never shared between threads.
 
 ```sql
