@@ -25,7 +25,7 @@ info:
     |---|---|---|
     | Search (front-end) | Search front-end, API checks in `api-tests/`, search benchmarks | `GET /search`, `GET /books/{book_id}`, `GET /search/filters` |
     | Ingestion (internal) | Start-up and corpus-loading scripts, administrators | `POST /ingest/{book_id}`, `GET /ingest/status/{book_id}`, `GET /ingest/list` |
-    | Indexing (internal) | Administrators, recovery procedures | Added by the Indexing Service owner |
+    | Indexing (internal) | Administrators, recovery procedures | `POST /index/update/{book_id}`, `POST /index/rebuild`, `GET /index/status` |
     | Operations | Start-up scripts, integration tests, benchmarks, monitoring | `GET /health` (all services) |
 
     Service-to-service coordination does not use HTTP: Ingestion and Indexing exchange
@@ -378,6 +378,145 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IngestListResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /index/update/{book_id}:
+    servers:
+      - url: http://localhost:7002
+        description: Indexing Service
+    post:
+      tags: [Indexing (internal)]
+      operationId: updateBookIndex
+      summary: Index or re-index one available book
+      description: |
+        Reads the book from the datalake, extracts its metadata and replaces its postings in the
+        datamart, all in one SQLite transaction. The book must have been made available by the
+        Ingestion Service: its files are located through `ingestion_log` in
+        `datalake/ingestion.db`, which the Indexing Service opens read-only.
+
+        In normal operation books are indexed when their `BookDownloaded` event arrives, so this
+        endpoint is meant for administrators and recovery procedures.
+
+        **Completion.** Synchronous: a `200` response means the new version of the book has been
+        committed and is visible to the Search Service.
+
+        **Idempotency and retries.** Indexing the same book again replaces its previous version and
+        never duplicates rows, so the request can be retried safely after a timeout or an error.
+        Concurrent calls for the same book are serialised by SQLite and the last commit wins; the
+        content is the same in both.
+      x-provider: Indexing Service
+      x-consumers: [Administrators, recovery procedures]
+      parameters:
+        - $ref: '#/components/parameters/BookId'
+      responses:
+        '200':
+          description: The book has been indexed and committed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexUpdateResponse'
+              example:
+                book_id: 1342
+                index: updated
+                distinct_terms: 6458
+                total_tokens: 127379
+        '400':
+          description: The `book_id` path parameter is not a positive integer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: {code: INVALID_PARAMETER, message: book_id must be a positive integer}
+        '404':
+          description: |
+            The Ingestion Service has not made the book available (never ingested, or its download
+            failed). Ingest it first with `POST /ingest/{book_id}`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: {code: NOT_FOUND, message: book 999999 is not available in the datalake}
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /index/rebuild:
+    servers:
+      - url: http://localhost:7002
+        description: Indexing Service
+    post:
+      tags: [Indexing (internal)]
+      operationId: rebuildIndex
+      summary: Rebuild the whole index from the datalake
+      description: |
+        Re-indexes every book recorded as `available` in `ingestion_log`, each one in its own
+        transaction, and then removes from the datamart the books that are no longer available.
+        The final state is the same as an index built from scratch, but the Search Service never
+        sees an empty or half-written index meanwhile: each book is either in its previous or in
+        its new version.
+
+        A book whose files cannot be read is reported in `failed_books`, keeps its previous version
+        and does not stop the rebuild.
+
+        **Completion.** Synchronous: the response is sent when the rebuild has finished. With the
+        20-book corpus it takes a few seconds; the caller should allow a generous timeout.
+
+        **Idempotency and retries.** Running it again produces the same index. Only one rebuild
+        runs at a time in each Indexing process; a second request while one is running gets `409`
+        and can be retried later. Rebuilds in different replicas are not coordinated, which is
+        harmless because indexing a book is idempotent.
+      x-provider: Indexing Service
+      x-consumers: [Administrators, recovery procedures, benchmarks]
+      responses:
+        '200':
+          description: The rebuild has finished.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexRebuildResponse'
+              example:
+                books_processed: 20
+                failed_books: []
+                books_removed: 0
+                elapsed_time: 4.3s
+        '409':
+          description: This process is already running a rebuild.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: {code: CONFLICT, message: a rebuild is already running}
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /index/status:
+    servers:
+      - url: http://localhost:7002
+        description: Indexing Service
+    get:
+      tags: [Indexing (internal)]
+      operationId: getIndexStatus
+      summary: Statistics of the index
+      description: |
+        Number of indexed books, time of the last committed change (`index_meta.last_update`) and
+        size of the datamart on disk (`datamart.db` plus its write-ahead log, in MiB rounded to two
+        decimals). Read-only and safe to call at any time.
+      x-provider: Indexing Service
+      x-consumers: [Administrators, start-up scripts, benchmarks]
+      responses:
+        '200':
+          description: Current statistics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexStatusResponse'
+              example:
+                books_indexed: 20
+                last_update: '2026-10-27T18:05:00.123456Z'
+                index_size_mb: 42.7
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -764,3 +903,59 @@ components:
       example:
         count: 2
         books: [11, 1342]
+    IndexUpdateResponse:
+      type: object
+      required: [book_id, index, distinct_terms, total_tokens]
+      properties:
+        book_id:
+          type: integer
+          minimum: 1
+        index:
+          type: string
+          enum: [updated]
+        distinct_terms:
+          type: integer
+          minimum: 0
+          description: Postings stored for the book (different terms in its body).
+        total_tokens:
+          type: integer
+          minimum: 0
+          description: Tokens in the body of the book.
+
+    IndexRebuildResponse:
+      type: object
+      required: [books_processed, failed_books, books_removed, elapsed_time]
+      properties:
+        books_processed:
+          type: integer
+          minimum: 0
+          description: Available books indexed successfully.
+        failed_books:
+          type: array
+          description: Ids of available books that could not be indexed; they keep their previous version.
+          items:
+            type: integer
+        books_removed:
+          type: integer
+          minimum: 0
+          description: Indexed books removed because they are no longer available in the datalake.
+        elapsed_time:
+          type: string
+          description: Wall-clock duration in seconds with one decimal, e.g. `4.3s`.
+
+    IndexStatusResponse:
+      type: object
+      required: [books_indexed, last_update, index_size_mb]
+      properties:
+        books_indexed:
+          type: integer
+          minimum: 0
+        last_update:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last committed change to the index (`index_meta.last_update`); null while there has been none.
+        index_size_mb:
+          type: number
+          minimum: 0
+          description: Size of `datamart.db` plus its write-ahead log, in MiB rounded to two decimals.
