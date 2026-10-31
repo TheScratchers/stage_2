@@ -35,13 +35,19 @@ public final class IndexingService {
     private final BookSource source;
     private final BookIndexer indexer;
     private final DatamartStore store;
+    private final IndexListener listener;
     private final AtomicBoolean rebuilding = new AtomicBoolean(false);
 
-    /** Creates the service over the given book source, indexer and datamart. */
-    public IndexingService(BookSource source, BookIndexer indexer, DatamartStore store) {
+    /**
+     * Creates the service over the given book source, indexer and datamart.
+     *
+     * @param listener notified after each book is committed ({@link IndexListener#NONE} for none)
+     */
+    public IndexingService(BookSource source, BookIndexer indexer, DatamartStore store, IndexListener listener) {
         this.source = source;
         this.indexer = indexer;
         this.store = store;
+        this.listener = listener;
     }
 
     /**
@@ -53,7 +59,9 @@ public final class IndexingService {
      */
     public IndexResult update(int bookId) throws BookNotAvailableException, IOException, SQLException {
         BookFiles files = source.find(bookId).orElseThrow(() -> new BookNotAvailableException(bookId));
-        return indexer.index(files.bookId(), files.headerFile(), files.bodyFile());
+        IndexResult result = indexer.index(files.bookId(), files.headerFile(), files.bodyFile());
+        listener.onIndexed(result);
+        return result;
     }
 
     /**
@@ -77,7 +85,7 @@ public final class IndexingService {
             for (BookFiles files : available) {
                 availableIds.add(files.bookId());
                 try {
-                    indexer.index(files.bookId(), files.headerFile(), files.bodyFile());
+                    listener.onIndexed(indexer.index(files.bookId(), files.headerFile(), files.bodyFile()));
                 } catch (IOException | SQLException e) {
                     LOG.warn("Rebuild could not index book {}: {}", files.bookId(), e.getMessage());
                     failed.add(files.bookId());
