@@ -94,6 +94,12 @@ public final class IngestionApp {
             IngestResult result = service.ingest(bookId);
             ctx.status(200).result(GSON.toJson(result));
         } catch (DownloadException e) {
+            if (e.reason() == DownloadException.Reason.NOT_FOUND) {
+                LOG.info("Book {} does not exist on Project Gutenberg", bookId);
+                ctx.status(404).result(GSON.toJson(
+                        error("NOT_FOUND", "Book " + bookId + " does not exist on Project Gutenberg")));
+                return;
+            }
             LOG.warn("Upstream error while ingesting book {}: {}", bookId, e.getMessage());
             ctx.status(502).result(GSON.toJson(error("UPSTREAM_ERROR", e.getMessage())));
         } catch (JMSException e) {

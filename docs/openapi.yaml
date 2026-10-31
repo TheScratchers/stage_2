@@ -309,6 +309,16 @@ paths:
                 $ref: '#/components/schemas/IngestResponse'
         '400':
           $ref: '#/components/responses/InvalidParameter'
+        '404':
+          description: |
+            Project Gutenberg has no book with this `book_id` (it answered 404). The attempt is
+            recorded as `failed` in the ingestion log; retrying returns the same error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: {code: NOT_FOUND, message: Book 99999999 does not exist on Project Gutenberg}
         '502':
           $ref: '#/components/responses/UpstreamError'
         '503':

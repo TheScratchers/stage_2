@@ -139,6 +139,22 @@ class IngestionAppTest {
     }
 
     @Test
+    void testPostIngestBookMissingOnGutenbergReturns404() throws Exception {
+        HttpRequest req = HttpRequest.newBuilder(URI.create(baseUri + "/ingest/777"))
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
+        HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+        assertEquals(404, resp.statusCode());
+        assertTrue(resp.body().contains("\"code\":\"NOT_FOUND\""));
+        assertTrue(resp.body().contains("does not exist on Project Gutenberg"));
+
+        HttpRequest reqStatus = HttpRequest.newBuilder(URI.create(baseUri + "/ingest/status/777")).GET().build();
+        HttpResponse<String> respStatus = http.send(reqStatus, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, respStatus.statusCode());
+        assertTrue(respStatus.body().contains("\"status\":\"failed\""));
+    }
+
+    @Test
     void testGetStatusNotFound() throws Exception {
         HttpRequest req = HttpRequest.newBuilder(URI.create(baseUri + "/ingest/status/9999")).GET().build();
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
