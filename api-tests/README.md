@@ -8,6 +8,49 @@ with the expected result written in a case file.
 | Case file | Service | Data | Checks |
 |---|---|---|---|
 | [`cases/search.json`](cases/search.json) | Search (front-end API) | Fixture datamart | 44 |
+| [`cases/corpus-search.json`](cases/corpus-search.json) | Search (front-end API) | Real pipeline, fixed corpus | 20 |
+| [`cases/ingestion.json`](cases/ingestion.json) | Ingestion (internal API) | Real pipeline, fixed corpus | 10 |
+| [`cases/indexing.json`](cases/indexing.json) | Indexing (internal API) | Real pipeline, fixed corpus | 9 |
+
+Coordination through the broker has no HTTP endpoint of its own; the pipeline checks exercise it
+end to end, because every book reaches Indexing and Search only through the `BookDownloaded` and
+`BookIndexed` events.
+
+## End-to-end checks over the real pipeline
+
+From the repository root, after `mvn clean verify`:
+
+```bash
+java -jar api-tests/target/api-tests.jar pipeline
+```
+
+The command starts the broker, Ingestion, Indexing and Search from their jars, each in its own JVM,
+with a fresh temporary `DATA_DIR` and free ports. It then ingests the 20 books of
+`samples/books.txt` with `POST /ingest/{id}` and waits until Indexing reports 20 books and Search
+lists 20 books in `/search/filters`. Finally it runs `corpus-search.json` against Search,
+`ingestion.json` against Ingestion and `indexing.json` against Indexing, stops every process and
+exits with `0` only if every check passes. Expected output: `39/39 checks passed`. The process logs
+stay in the printed `DATA_DIR/logs/`.
+
+- **Exact results on the corpus.** For each word of `samples/words.txt`, `corpus-search.json` lists
+  every matching `book_id` in result order with its score (Stage 1 feedback: compare the returned
+  IDs, not only the latency). The values were cross-checked against an independent SQL query over
+  the datamart when the file was written.
+- **The specification matches the system.** The five `GET /search` examples of `docs/openapi.yaml`
+  are checked against the real pipeline as well.
+- **Offline by default.** The books are served from `samples/books` by a local stand-in for Project
+  Gutenberg (`GUTENBERG_BASE_URL`), so the results do not depend on the network or on later edits
+  by Gutenberg. `pipeline --gutenberg` downloads from the real site instead. On 2026-11-02 that run
+  passed 38 of 39 checks: every `book_id` and score matched, but Gutenberg had changed the title of
+  book 84 to "Frankenstein; or, The modern Prometheus" since the corpus was captured in Stage 1.
+- `pipeline --keep` leaves the four services running after the checks, to try the API by hand.
+
+## Specification coverage
+
+`OpenApiContractTest` runs on every build and fails if a case file checks a route or a status code
+that `docs/openapi.yaml` does not document, if a documented operation is not exercised by any case,
+or if a `GET /search` example of the specification differs from the real pipeline response recorded
+in `corpus-search.json`.
 
 ## How to run
 

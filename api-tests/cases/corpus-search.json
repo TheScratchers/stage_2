@@ -1,0 +1,1116 @@
+{
+  "description": "Search API over the real pipeline loaded with the fixed corpus (samples/books.txt). For every word of samples/words.txt the exact book_ids are listed in result order, with their scores (Stage 1 feedback: compare returned IDs, not only latency); they were cross-checked against an independent SQL query over the datamart. It also checks that the examples of docs/openapi.yaml are what the real system returns.",
+  "cases": [
+    {
+      "name": "corpus word 'time': exact book_ids in result order (20 books)",
+      "path": "/search?q=time&limit=100",
+      "status": 200,
+      "body": {
+        "query": "time",
+        "terms": [
+          "time"
+        ],
+        "total": 20,
+        "results": [
+          {
+            "book_id": 345,
+            "score": 390
+          },
+          {
+            "book_id": 2554,
+            "score": 385
+          },
+          {
+            "book_id": 1400,
+            "score": 374
+          },
+          {
+            "book_id": 2701,
+            "score": 334
+          },
+          {
+            "book_id": 76,
+            "score": 325
+          },
+          {
+            "book_id": 98,
+            "score": 267
+          },
+          {
+            "book_id": 1260,
+            "score": 244
+          },
+          {
+            "book_id": 2591,
+            "score": 207
+          },
+          {
+            "book_id": 1342,
+            "score": 201
+          },
+          {
+            "book_id": 74,
+            "score": 191
+          },
+          {
+            "book_id": 1661,
+            "score": 151
+          },
+          {
+            "book_id": 120,
+            "score": 131
+          },
+          {
+            "book_id": 174,
+            "score": 110
+          },
+          {
+            "book_id": 84,
+            "score": 98
+          },
+          {
+            "book_id": 11,
+            "score": 71
+          },
+          {
+            "book_id": 46,
+            "score": 68
+          },
+          {
+            "book_id": 5200,
+            "score": 59
+          },
+          {
+            "book_id": 55,
+            "score": 45
+          },
+          {
+            "book_id": 844,
+            "score": 37
+          },
+          {
+            "book_id": 43,
+            "score": 30
+          }
+        ]
+      }
+    },
+    {
+      "name": "corpus word 'love': exact book_ids in result order (20 books)",
+      "path": "/search?q=love&limit=100",
+      "status": 200,
+      "body": {
+        "query": "love",
+        "terms": [
+          "love"
+        ],
+        "total": 20,
+        "results": [
+          {
+            "book_id": 1260,
+            "score": 153
+          },
+          {
+            "book_id": 174,
+            "score": 112
+          },
+          {
+            "book_id": 1342,
+            "score": 102
+          },
+          {
+            "book_id": 345,
+            "score": 84
+          },
+          {
+            "book_id": 2554,
+            "score": 75
+          },
+          {
+            "book_id": 1400,
+            "score": 60
+          },
+          {
+            "book_id": 84,
+            "score": 59
+          },
+          {
+            "book_id": 98,
+            "score": 56
+          },
+          {
+            "book_id": 2701,
+            "score": 24
+          },
+          {
+            "book_id": 844,
+            "score": 23
+          },
+          {
+            "book_id": 1661,
+            "score": 18
+          },
+          {
+            "book_id": 2591,
+            "score": 17
+          },
+          {
+            "book_id": 55,
+            "score": 12
+          },
+          {
+            "book_id": 74,
+            "score": 11
+          },
+          {
+            "book_id": 76,
+            "score": 9
+          },
+          {
+            "book_id": 46,
+            "score": 8
+          },
+          {
+            "book_id": 11,
+            "score": 3
+          },
+          {
+            "book_id": 43,
+            "score": 3
+          },
+          {
+            "book_id": 5200,
+            "score": 2
+          },
+          {
+            "book_id": 120,
+            "score": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "corpus word 'heart': exact book_ids in result order (19 books)",
+      "path": "/search?q=heart&limit=100",
+      "status": 200,
+      "body": {
+        "query": "heart",
+        "terms": [
+          "heart"
+        ],
+        "total": 19,
+        "results": [
+          {
+            "book_id": 1260,
+            "score": 176
+          },
+          {
+            "book_id": 345,
+            "score": 141
+          },
+          {
+            "book_id": 2554,
+            "score": 134
+          },
+          {
+            "book_id": 1400,
+            "score": 93
+          },
+          {
+            "book_id": 2701,
+            "score": 91
+          },
+          {
+            "book_id": 84,
+            "score": 81
+          },
+          {
+            "book_id": 98,
+            "score": 74
+          },
+          {
+            "book_id": 2591,
+            "score": 73
+          },
+          {
+            "book_id": 74,
+            "score": 70
+          },
+          {
+            "book_id": 55,
+            "score": 67
+          },
+          {
+            "book_id": 1342,
+            "score": 46
+          },
+          {
+            "book_id": 120,
+            "score": 35
+          },
+          {
+            "book_id": 76,
+            "score": 28
+          },
+          {
+            "book_id": 174,
+            "score": 28
+          },
+          {
+            "book_id": 46,
+            "score": 25
+          },
+          {
+            "book_id": 1661,
+            "score": 25
+          },
+          {
+            "book_id": 43,
+            "score": 11
+          },
+          {
+            "book_id": 11,
+            "score": 2
+          },
+          {
+            "book_id": 5200,
+            "score": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "corpus word 'nothing': exact book_ids in result order (20 books)",
+      "path": "/search?q=nothing&limit=100",
+      "status": 200,
+      "body": {
+        "query": "nothing",
+        "terms": [
+          "nothing"
+        ],
+        "total": 20,
+        "results": [
+          {
+            "book_id": 2554,
+            "score": 285
+          },
+          {
+            "book_id": 1342,
+            "score": 187
+          },
+          {
+            "book_id": 76,
+            "score": 181
+          },
+          {
+            "book_id": 1400,
+            "score": 176
+          },
+          {
+            "book_id": 1260,
+            "score": 166
+          },
+          {
+            "book_id": 98,
+            "score": 151
+          },
+          {
+            "book_id": 2591,
+            "score": 127
+          },
+          {
+            "book_id": 2701,
+            "score": 115
+          },
+          {
+            "book_id": 345,
+            "score": 112
+          },
+          {
+            "book_id": 1661,
+            "score": 108
+          },
+          {
+            "book_id": 174,
+            "score": 93
+          },
+          {
+            "book_id": 74,
+            "score": 54
+          },
+          {
+            "book_id": 120,
+            "score": 52
+          },
+          {
+            "book_id": 84,
+            "score": 39
+          },
+          {
+            "book_id": 46,
+            "score": 35
+          },
+          {
+            "book_id": 11,
+            "score": 34
+          },
+          {
+            "book_id": 55,
+            "score": 30
+          },
+          {
+            "book_id": 844,
+            "score": 21
+          },
+          {
+            "book_id": 43,
+            "score": 20
+          },
+          {
+            "book_id": 5200,
+            "score": 18
+          }
+        ]
+      }
+    },
+    {
+      "name": "corpus word 'death': exact book_ids in result order (20 books)",
+      "path": "/search?q=death&limit=100",
+      "status": 200,
+      "body": {
+        "query": "death",
+        "terms": [
+          "death"
+        ],
+        "total": 20,
+        "results": [
+          {
+            "book_id": 345,
+            "score": 95
+          },
+          {
+            "book_id": 2701,
+            "score": 90
+          },
+          {
+            "book_id": 84,
+            "score": 79
+          },
+          {
+            "book_id": 98,
+            "score": 67
+          },
+          {
+            "book_id": 1260,
+            "score": 56
+          },
+          {
+            "book_id": 2554,
+            "score": 52
+          },
+          {
+            "book_id": 1400,
+            "score": 36
+          },
+          {
+            "book_id": 174,
+            "score": 32
+          },
+          {
+            "book_id": 1661,
+            "score": 31
+          },
+          {
+            "book_id": 2591,
+            "score": 26
+          },
+          {
+            "book_id": 120,
+            "score": 24
+          },
+          {
+            "book_id": 74,
+            "score": 16
+          },
+          {
+            "book_id": 76,
+            "score": 16
+          },
+          {
+            "book_id": 43,
+            "score": 15
+          },
+          {
+            "book_id": 46,
+            "score": 12
+          },
+          {
+            "book_id": 1342,
+            "score": 9
+          },
+          {
+            "book_id": 844,
+            "score": 6
+          },
+          {
+            "book_id": 55,
+            "score": 3
+          },
+          {
+            "book_id": 5200,
+            "score": 3
+          },
+          {
+            "book_id": 11,
+            "score": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "corpus word 'truth': exact book_ids in result order (19 books)",
+      "path": "/search?q=truth&limit=100",
+      "status": 200,
+      "body": {
+        "query": "truth",
+        "terms": [
+          "truth"
+        ],
+        "total": 19,
+        "results": [
+          {
+            "book_id": 2554,
+            "score": 45
+          },
+          {
+            "book_id": 1260,
+            "score": 36
+          },
+          {
+            "book_id": 2701,
+            "score": 36
+          },
+          {
+            "book_id": 1342,
+            "score": 27
+          },
+          {
+            "book_id": 1400,
+            "score": 23
+          },
+          {
+            "book_id": 98,
+            "score": 21
+          },
+          {
+            "book_id": 345,
+            "score": 21
+          },
+          {
+            "book_id": 1661,
+            "score": 15
+          },
+          {
+            "book_id": 84,
+            "score": 14
+          },
+          {
+            "book_id": 76,
+            "score": 12
+          },
+          {
+            "book_id": 74,
+            "score": 10
+          },
+          {
+            "book_id": 120,
+            "score": 10
+          },
+          {
+            "book_id": 844,
+            "score": 10
+          },
+          {
+            "book_id": 2591,
+            "score": 9
+          },
+          {
+            "book_id": 174,
+            "score": 6
+          },
+          {
+            "book_id": 46,
+            "score": 5
+          },
+          {
+            "book_id": 43,
+            "score": 3
+          },
+          {
+            "book_id": 55,
+            "score": 2
+          },
+          {
+            "book_id": 11,
+            "score": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "corpus word 'fortune': exact book_ids in result order (18 books)",
+      "path": "/search?q=fortune&limit=100",
+      "status": 200,
+      "body": {
+        "query": "fortune",
+        "terms": [
+          "fortune"
+        ],
+        "total": 18,
+        "results": [
+          {
+            "book_id": 1342,
+            "score": 39
+          },
+          {
+            "book_id": 1260,
+            "score": 35
+          },
+          {
+            "book_id": 1400,
+            "score": 29
+          },
+          {
+            "book_id": 120,
+            "score": 21
+          },
+          {
+            "book_id": 2554,
+            "score": 12
+          },
+          {
+            "book_id": 2591,
+            "score": 12
+          },
+          {
+            "book_id": 98,
+            "score": 11
+          },
+          {
+            "book_id": 1661,
+            "score": 11
+          },
+          {
+            "book_id": 84,
+            "score": 9
+          },
+          {
+            "book_id": 345,
+            "score": 7
+          },
+          {
+            "book_id": 76,
+            "score": 5
+          },
+          {
+            "book_id": 43,
+            "score": 4
+          },
+          {
+            "book_id": 46,
+            "score": 4
+          },
+          {
+            "book_id": 55,
+            "score": 3
+          },
+          {
+            "book_id": 74,
+            "score": 2
+          },
+          {
+            "book_id": 844,
+            "score": 2
+          },
+          {
+            "book_id": 2701,
+            "score": 2
+          },
+          {
+            "book_id": 174,
+            "score": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "corpus word 'monster': exact book_ids in result order (14 books)",
+      "path": "/search?q=monster&limit=100",
+      "status": 200,
+      "body": {
+        "query": "monster",
+        "terms": [
+          "monster"
+        ],
+        "total": 14,
+        "results": [
+          {
+            "book_id": 2701,
+            "score": 49
+          },
+          {
+            "book_id": 84,
+            "score": 31
+          },
+          {
+            "book_id": 345,
+            "score": 23
+          },
+          {
+            "book_id": 2554,
+            "score": 8
+          },
+          {
+            "book_id": 55,
+            "score": 6
+          },
+          {
+            "book_id": 1400,
+            "score": 5
+          },
+          {
+            "book_id": 1260,
+            "score": 4
+          },
+          {
+            "book_id": 2591,
+            "score": 4
+          },
+          {
+            "book_id": 174,
+            "score": 3
+          },
+          {
+            "book_id": 74,
+            "score": 1
+          },
+          {
+            "book_id": 98,
+            "score": 1
+          },
+          {
+            "book_id": 120,
+            "score": 1
+          },
+          {
+            "book_id": 844,
+            "score": 1
+          },
+          {
+            "book_id": 5200,
+            "score": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "corpus word 'wonderland': exact book_ids in result order (1 books)",
+      "path": "/search?q=wonderland&limit=100",
+      "status": 200,
+      "body": {
+        "query": "wonderland",
+        "terms": [
+          "wonderland"
+        ],
+        "total": 1,
+        "results": [
+          {
+            "book_id": 11,
+            "score": 3
+          }
+        ]
+      }
+    },
+    {
+      "name": "corpus word 'darcy': exact book_ids in result order (1 books)",
+      "path": "/search?q=darcy&limit=100",
+      "status": 200,
+      "body": {
+        "query": "darcy",
+        "terms": [
+          "darcy"
+        ],
+        "total": 1,
+        "results": [
+          {
+            "book_id": 1342,
+            "score": 432
+          }
+        ]
+      }
+    },
+    {
+      "name": "openapi example: keyword (GET /search?q=monster&limit=3)",
+      "path": "/search?q=monster&limit=3",
+      "status": 200,
+      "body": {
+        "query": "monster",
+        "terms": [
+          "monster"
+        ],
+        "filters": {},
+        "total": 14,
+        "offset": 0,
+        "limit": 3,
+        "results": [
+          {
+            "book_id": 2701,
+            "title": "Moby Dick; Or, The Whale",
+            "author": "Herman Melville",
+            "language": "en",
+            "year": 2001,
+            "score": 49
+          },
+          {
+            "book_id": 84,
+            "title": "Frankenstein; or, the modern prometheus",
+            "author": "Mary Wollstonecraft Shelley",
+            "language": "en",
+            "year": 1993,
+            "score": 31
+          },
+          {
+            "book_id": 345,
+            "title": "Dracula",
+            "author": "Bram Stoker",
+            "language": "en",
+            "year": 1995,
+            "score": 23
+          }
+        ]
+      }
+    },
+    {
+      "name": "openapi example: one filter (GET /search?q=adventure&author=twain)",
+      "path": "/search?q=adventure&author=twain",
+      "status": 200,
+      "body": {
+        "query": "adventure",
+        "terms": [
+          "adventure"
+        ],
+        "filters": {
+          "author": "twain"
+        },
+        "total": 2,
+        "offset": 0,
+        "limit": 20,
+        "results": [
+          {
+            "book_id": 74,
+            "title": "The Adventures of Tom Sawyer, Complete",
+            "author": "Mark Twain",
+            "language": "en",
+            "year": 2004,
+            "score": 14
+          },
+          {
+            "book_id": 76,
+            "title": "Adventures of Huckleberry Finn",
+            "author": "Mark Twain",
+            "language": "en",
+            "year": 2004,
+            "score": 4
+          }
+        ]
+      }
+    },
+    {
+      "name": "openapi example: combined filters (GET /search?q=darcy&language=EN&year=1998)",
+      "path": "/search?q=darcy&language=EN&year=1998",
+      "status": 200,
+      "body": {
+        "query": "darcy",
+        "terms": [
+          "darcy"
+        ],
+        "filters": {
+          "language": "en",
+          "year": 1998
+        },
+        "total": 1,
+        "offset": 0,
+        "limit": 20,
+        "results": [
+          {
+            "book_id": 1342,
+            "title": "Pride and Prejudice",
+            "author": "Jane Austen",
+            "language": "en",
+            "year": 1998,
+            "score": 432
+          }
+        ]
+      }
+    },
+    {
+      "name": "openapi example: pagination (GET /search?q=adventure&offset=2&limit=2)",
+      "path": "/search?q=adventure&offset=2&limit=2",
+      "status": 200,
+      "body": {
+        "query": "adventure",
+        "terms": [
+          "adventure"
+        ],
+        "filters": {},
+        "total": 16,
+        "offset": 2,
+        "limit": 2,
+        "results": [
+          {
+            "book_id": 120,
+            "title": "Treasure Island",
+            "author": "Robert Louis Stevenson",
+            "language": "en",
+            "year": 2006,
+            "score": 12
+          },
+          {
+            "book_id": 345,
+            "title": "Dracula",
+            "author": "Bram Stoker",
+            "language": "en",
+            "year": 1995,
+            "score": 9
+          }
+        ]
+      }
+    },
+    {
+      "name": "openapi example: no matches (GET /search?q=zxqv)",
+      "path": "/search?q=zxqv",
+      "status": 200,
+      "body": {
+        "query": "zxqv",
+        "terms": [
+          "zxqv"
+        ],
+        "filters": {},
+        "total": 0,
+        "offset": 0,
+        "limit": 20,
+        "results": []
+      }
+    },
+    {
+      "name": "corpus AND query 'love death' (20 books)",
+      "path": "/search?q=love%20death&limit=100",
+      "status": 200,
+      "body": {
+        "terms": [
+          "love",
+          "death"
+        ],
+        "total": 20,
+        "results": [
+          {
+            "book_id": 1260,
+            "score": 209
+          },
+          {
+            "book_id": 345,
+            "score": 179
+          },
+          {
+            "book_id": 174,
+            "score": 144
+          },
+          {
+            "book_id": 84,
+            "score": 138
+          },
+          {
+            "book_id": 2554,
+            "score": 127
+          },
+          {
+            "book_id": 98,
+            "score": 123
+          },
+          {
+            "book_id": 2701,
+            "score": 114
+          },
+          {
+            "book_id": 1342,
+            "score": 111
+          },
+          {
+            "book_id": 1400,
+            "score": 96
+          },
+          {
+            "book_id": 1661,
+            "score": 49
+          },
+          {
+            "book_id": 2591,
+            "score": 43
+          },
+          {
+            "book_id": 844,
+            "score": 29
+          },
+          {
+            "book_id": 74,
+            "score": 27
+          },
+          {
+            "book_id": 76,
+            "score": 25
+          },
+          {
+            "book_id": 120,
+            "score": 25
+          },
+          {
+            "book_id": 46,
+            "score": 20
+          },
+          {
+            "book_id": 43,
+            "score": 18
+          },
+          {
+            "book_id": 55,
+            "score": 15
+          },
+          {
+            "book_id": 5200,
+            "score": 5
+          },
+          {
+            "book_id": 11,
+            "score": 4
+          }
+        ]
+      }
+    },
+    {
+      "name": "corpus filter: author=dickens returns his three books",
+      "path": "/search?q=time&author=dickens",
+      "status": 200,
+      "body": {
+        "total": 3,
+        "results": [
+          {
+            "book_id": 1400,
+            "author": "Charles Dickens"
+          },
+          {
+            "book_id": 98,
+            "author": "Charles Dickens"
+          },
+          {
+            "book_id": 46,
+            "author": "Charles Dickens"
+          }
+        ]
+      }
+    },
+    {
+      "name": "corpus filter: year=2004 (3 books)",
+      "path": "/search?q=time&year=2004",
+      "status": 200,
+      "body": {
+        "filters": {
+          "year": 2004
+        },
+        "total": 3,
+        "results": [
+          {
+            "book_id": 76
+          },
+          {
+            "book_id": 74
+          },
+          {
+            "book_id": 46
+          }
+        ]
+      }
+    },
+    {
+      "name": "book details of 1342",
+      "path": "/books/1342",
+      "status": 200,
+      "body": {
+        "book_id": 1342,
+        "title": "Pride and Prejudice",
+        "author": "Jane Austen",
+        "language": "en",
+        "year": 1998
+      }
+    },
+    {
+      "name": "filter values of the corpus",
+      "path": "/search/filters",
+      "status": 200,
+      "body": {
+        "total_books": 20,
+        "languages": [
+          {
+            "code": "en",
+            "books": 20
+          }
+        ],
+        "years": [
+          {
+            "year": 1993,
+            "books": 2
+          },
+          {
+            "year": 1994,
+            "books": 2
+          },
+          {
+            "year": 1995,
+            "books": 1
+          },
+          {
+            "year": 1997,
+            "books": 1
+          },
+          {
+            "year": 1998,
+            "books": 3
+          },
+          {
+            "year": 1999,
+            "books": 1
+          },
+          {
+            "year": 2001,
+            "books": 2
+          },
+          {
+            "year": 2004,
+            "books": 3
+          },
+          {
+            "year": 2005,
+            "books": 1
+          },
+          {
+            "year": 2006,
+            "books": 2
+          },
+          {
+            "year": 2008,
+            "books": 2
+          }
+        ]
+      }
+    }
+  ]
+}
