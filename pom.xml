@@ -20,6 +20,7 @@
         <module>search-service</module>
         <module>api-tests</module>
         <module>benchmarks/load-client</module>
+        <module>benchmarks/integration</module>
     </modules>
 
     <properties>
