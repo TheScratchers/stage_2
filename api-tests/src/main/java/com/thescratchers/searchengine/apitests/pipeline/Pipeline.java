@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -26,69 +27,133 @@ import java.util.function.BooleanSupplier;
  * and waits until the choreography has indexed every book and Search has seen it.
  *
  * <p>Every run uses a fresh {@code DATA_DIR} and free ports, so it never touches an existing
- * deployment. The processes' output goes to {@code DATA_DIR/logs/}.
+ * deployment. The processes' output goes to {@code DATA_DIR/logs/}. The {@link Topology} sets how
+ * many Search and Indexing replicas run, the consumer threads of each Indexing replica and the JVM
+ * heap of every service.
  */
 public final class Pipeline implements AutoCloseable {
 
     private static final Duration STARTUP_TIMEOUT = Duration.ofSeconds(60);
     private static final Duration INDEXING_TIMEOUT = Duration.ofMinutes(3);
 
+    /**
+     * Processes to start.
+     *
+     * @param searchReplicas   Search Service processes, all reading the same datamart
+     * @param indexingReplicas Indexing Service processes, competing for the same queue
+     * @param indexingWorkers  {@code INDEXING_WORKERS} of each Indexing replica
+     * @param heap             {@code -Xmx} of every service (e.g. {@code 1g}), or {@code null} for the JVM default
+     */
+    public record Topology(int searchReplicas, int indexingReplicas, int indexingWorkers, String heap) {
+
+        /** One process of each service, two consumer threads and the default heap. */
+        public static final Topology DEFAULT = new Topology(1, 1, 2, null);
+
+        /** The same topology with another {@code -Xmx}. */
+        public Topology withHeap(String newHeap) {
+            return new Topology(searchReplicas, indexingReplicas, indexingWorkers, newHeap);
+        }
+    }
+
     private final Path repo;
     private final Path dataDir;
     private final String gutenbergUrl;
+    private final Topology topology;
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
-    private final List<Process> processes = new ArrayList<>();
+    private final Map<String, Process> processes = new LinkedHashMap<>();
 
     private int brokerPort;
     private int ingestionPort;
-    private int indexingPort;
-    private int searchPort;
+    private final List<Integer> indexingPorts = new ArrayList<>();
+    private final List<Integer> searchPorts = new ArrayList<>();
+
+    /** Pipeline with {@link Topology#DEFAULT}. */
+    public Pipeline(Path repo, Path dataDir, String gutenbergUrl) {
+        this(repo, dataDir, gutenbergUrl, Topology.DEFAULT);
+    }
 
     /**
      * @param repo         repository root, where {@code <module>/target/<module>.jar} are found
      * @param dataDir      empty directory used as {@code DATA_DIR}
      * @param gutenbergUrl {@code GUTENBERG_BASE_URL} for the Ingestion Service
+     * @param topology     processes to start
      */
-    public Pipeline(Path repo, Path dataDir, String gutenbergUrl) {
+    public Pipeline(Path repo, Path dataDir, String gutenbergUrl, Topology topology) {
         this.repo = repo;
         this.dataDir = dataDir;
         this.gutenbergUrl = gutenbergUrl;
+        this.topology = topology;
+    }
+
+    public String brokerUrl() {
+        return "tcp://localhost:" + brokerPort;
     }
 
     public String ingestionUrl() {
         return "http://localhost:" + ingestionPort;
     }
 
+    /** URL of the first Indexing replica. */
     public String indexingUrl() {
-        return "http://localhost:" + indexingPort;
+        return indexingUrls().get(0);
     }
 
+    /** URL of the first Search replica. */
     public String searchUrl() {
-        return "http://localhost:" + searchPort;
+        return searchUrls().get(0);
     }
 
-    /** Starts the four processes and waits until each one accepts requests. */
+    public List<String> indexingUrls() {
+        return indexingPorts.stream().map(port -> "http://localhost:" + port).toList();
+    }
+
+    public List<String> searchUrls() {
+        return searchPorts.stream().map(port -> "http://localhost:" + port).toList();
+    }
+
+    public Path dataDir() {
+        return dataDir;
+    }
+
+    /** Running processes by name ({@code broker}, {@code ingestion}, {@code indexing-1}, {@code search-2}, ...). */
+    public Map<String, Process> processes() {
+        return Map.copyOf(processes);
+    }
+
+    /** Starts every process and waits until each one accepts requests. */
     public void start() throws IOException, InterruptedException {
         Files.createDirectories(dataDir.resolve("logs"));
         brokerPort = freePort();
         ingestionPort = freePort();
-        indexingPort = freePort();
-        searchPort = freePort();
+        for (int i = 0; i < topology.indexingReplicas(); i++) {
+            indexingPorts.add(freePort());
+        }
+        for (int i = 0; i < topology.searchReplicas(); i++) {
+            searchPorts.add(freePort());
+        }
 
-        launch("broker", Map.of());
+        launch("broker", "broker", Map.of());
         await("the broker on port " + brokerPort, STARTUP_TIMEOUT, () -> portOpen(brokerPort));
-        launch("indexing-service", Map.of("INDEXING_PORT", String.valueOf(indexingPort)));
-        launch("search-service", Map.of("SEARCH_PORT", String.valueOf(searchPort)));
-        launch("ingestion-service", Map.of("INGESTION_PORT", String.valueOf(ingestionPort),
+        for (int i = 0; i < indexingPorts.size(); i++) {
+            launch("indexing-" + (i + 1), "indexing-service", Map.of("INDEXING_PORT", String.valueOf(indexingPorts.get(i)),
+                    "INDEXING_WORKERS", String.valueOf(topology.indexingWorkers())));
+        }
+        for (int i = 0; i < searchPorts.size(); i++) {
+            launch("search-" + (i + 1), "search-service", Map.of("SEARCH_PORT", String.valueOf(searchPorts.get(i))));
+        }
+        launch("ingestion", "ingestion-service", Map.of("INGESTION_PORT", String.valueOf(ingestionPort),
                 "GUTENBERG_BASE_URL", gutenbergUrl));
-        for (String url : List.of(indexingUrl(), searchUrl(), ingestionUrl())) {
+        List<String> urls = new ArrayList<>(indexingUrls());
+        urls.addAll(searchUrls());
+        urls.add(ingestionUrl());
+        for (String url : urls) {
             await(url + "/health", STARTUP_TIMEOUT, () -> status("GET", url + "/health") == 200);
         }
     }
 
     /**
      * Ingests every book with {@code POST /ingest/{id}} and waits until the Indexing Service reports
-     * all of them indexed and Search lists all of them in {@code GET /search/filters}.
+     * all of them indexed and every Search replica lists all of them in {@code GET /search/filters}.
      *
      * @throws IllegalStateException if a book cannot be ingested
      */
@@ -102,15 +167,18 @@ public final class Pipeline implements AutoCloseable {
         int expected = bookIds.size();
         await(expected + " books indexed", INDEXING_TIMEOUT,
                 () -> intField(indexingUrl() + "/index/status", "books_indexed") == expected);
-        await(expected + " books visible to Search", INDEXING_TIMEOUT,
-                () -> intField(searchUrl() + "/search/filters", "total_books") == expected);
+        for (String url : searchUrls()) {
+            await(expected + " books visible to " + url, INDEXING_TIMEOUT,
+                    () -> intField(url + "/search/filters", "total_books") == expected);
+        }
     }
 
-    /** Stops every process started by this pipeline. */
+    /** Stops every process started by this pipeline, in reverse order of start. */
     @Override
     public void close() {
-        for (int i = processes.size() - 1; i >= 0; i--) {
-            Process process = processes.get(i);
+        List<Process> started = new ArrayList<>(processes.values());
+        for (int i = started.size() - 1; i >= 0; i--) {
+            Process process = started.get(i);
             process.destroy();
             try {
                 if (!process.waitFor(10, TimeUnit.SECONDS)) {
@@ -123,19 +191,25 @@ public final class Pipeline implements AutoCloseable {
         }
     }
 
-    private void launch(String module, Map<String, String> extraEnv) throws IOException {
+    private void launch(String name, String module, Map<String, String> extraEnv) throws IOException {
         Path jar = repo.resolve(module).resolve("target").resolve(module + ".jar");
         if (!Files.isRegularFile(jar)) {
             throw new IOException("Missing " + jar + "; run mvn clean verify first");
         }
-        String java = Path.of(System.getProperty("java.home"), "bin", "java").toString();
-        ProcessBuilder builder = new ProcessBuilder(java, "-jar", jar.toAbsolutePath().toString())
+        List<String> command = new ArrayList<>();
+        command.add(Path.of(System.getProperty("java.home"), "bin", "java").toString());
+        if (topology.heap() != null) {
+            command.add("-Xmx" + topology.heap());
+        }
+        command.add("-jar");
+        command.add(jar.toAbsolutePath().toString());
+        ProcessBuilder builder = new ProcessBuilder(command)
                 .redirectErrorStream(true)
-                .redirectOutput(dataDir.resolve("logs").resolve(module + ".log").toFile());
+                .redirectOutput(dataDir.resolve("logs").resolve(name + ".log").toFile());
         builder.environment().put("DATA_DIR", dataDir.toAbsolutePath().toString());
-        builder.environment().put("BROKER_URL", "tcp://localhost:" + brokerPort);
+        builder.environment().put("BROKER_URL", brokerUrl());
         builder.environment().putAll(extraEnv);
-        processes.add(builder.start());
+        processes.put(name, builder.start());
     }
 
     private int status(String method, String url) {
@@ -171,9 +245,9 @@ public final class Pipeline implements AutoCloseable {
     private void await(String what, Duration timeout, BooleanSupplier condition) throws InterruptedException {
         long deadline = System.nanoTime() + timeout.toNanos();
         while (!condition.getAsBoolean()) {
-            for (Process process : processes) {
-                if (!process.isAlive()) {
-                    throw new IllegalStateException("A service exited while waiting for " + what
+            for (Map.Entry<String, Process> process : processes.entrySet()) {
+                if (!process.getValue().isAlive()) {
+                    throw new IllegalStateException(process.getKey() + " exited while waiting for " + what
                             + "; see " + dataDir.resolve("logs"));
                 }
             }
