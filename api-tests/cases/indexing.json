@@ -1,0 +1,96 @@
+{
+  "description": "Internal Indexing API over the real pipeline after loading the corpus (and after ingestion.json): status, synchronous idempotent update, errors and a full rebuild. Run in this order.",
+  "cases": [
+    {
+      "name": "health",
+      "path": "/health",
+      "status": 200,
+      "body": {
+        "service": "indexing-service",
+        "status": "UP"
+      }
+    },
+    {
+      "name": "status: the 20 corpus books are indexed",
+      "path": "/index/status",
+      "status": 200,
+      "body": {
+        "books_indexed": 20
+      }
+    },
+    {
+      "name": "update one book (synchronous, committed)",
+      "method": "POST",
+      "path": "/index/update/1342",
+      "status": 200,
+      "body": {
+        "book_id": 1342,
+        "index": "updated",
+        "distinct_terms": 6730,
+        "total_tokens": 128559
+      }
+    },
+    {
+      "name": "update is idempotent: the index still has 20 books",
+      "path": "/index/status",
+      "status": 200,
+      "body": {
+        "books_indexed": 20
+      }
+    },
+    {
+      "name": "update a book that was never ingested",
+      "method": "POST",
+      "path": "/index/update/999999",
+      "status": 404,
+      "body": {
+        "error": {
+          "code": "NOT_FOUND",
+          "message": "book 999999 is not available in the datalake"
+        }
+      }
+    },
+    {
+      "name": "update a book whose ingestion failed",
+      "method": "POST",
+      "path": "/index/update/99999999",
+      "status": 404,
+      "body": {
+        "error": {
+          "code": "NOT_FOUND"
+        }
+      }
+    },
+    {
+      "name": "update with an invalid id",
+      "method": "POST",
+      "path": "/index/update/abc",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "book_id must be a positive integer"
+        }
+      }
+    },
+    {
+      "name": "rebuild re-indexes every available book",
+      "method": "POST",
+      "path": "/index/rebuild",
+      "status": 200,
+      "body": {
+        "books_processed": 20,
+        "failed_books": [],
+        "books_removed": 0
+      }
+    },
+    {
+      "name": "status after the rebuild",
+      "path": "/index/status",
+      "status": 200,
+      "body": {
+        "books_indexed": 20
+      }
+    }
+  ]
+}

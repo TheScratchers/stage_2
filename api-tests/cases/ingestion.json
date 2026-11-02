@@ -1,0 +1,125 @@
+{
+  "description": "Internal Ingestion API over the real pipeline after loading the corpus: listing, status, idempotent re-ingestion, a book missing on Gutenberg and invalid ids. Run in this order.",
+  "cases": [
+    {
+      "name": "health",
+      "path": "/health",
+      "status": 200,
+      "body": {
+        "service": "ingestion-service",
+        "status": "UP"
+      }
+    },
+    {
+      "name": "list: the 20 corpus books are available",
+      "path": "/ingest/list",
+      "status": 200,
+      "body": {
+        "count": 20,
+        "books": [
+          11,
+          43,
+          46,
+          55,
+          74,
+          76,
+          84,
+          98,
+          120,
+          174,
+          345,
+          844,
+          1260,
+          1342,
+          1400,
+          1661,
+          2554,
+          2591,
+          2701,
+          5200
+        ]
+      }
+    },
+    {
+      "name": "status of an ingested book",
+      "path": "/ingest/status/1342",
+      "status": 200,
+      "body": {
+        "book_id": 1342,
+        "status": "available"
+      }
+    },
+    {
+      "name": "status of a book never ingested",
+      "path": "/ingest/status/999999",
+      "status": 404,
+      "body": {
+        "error": {
+          "code": "NOT_FOUND"
+        }
+      }
+    },
+    {
+      "name": "status with an invalid id",
+      "path": "/ingest/status/abc",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "book_id must be a positive integer"
+        }
+      }
+    },
+    {
+      "name": "ingest again is idempotent (already_available, event re-published)",
+      "method": "POST",
+      "path": "/ingest/1342",
+      "status": 200,
+      "body": {
+        "book_id": 1342,
+        "status": "already_available"
+      }
+    },
+    {
+      "name": "ingest a book that does not exist on Gutenberg",
+      "method": "POST",
+      "path": "/ingest/99999999",
+      "status": 404,
+      "body": {
+        "error": {
+          "code": "NOT_FOUND",
+          "message": "Book 99999999 does not exist on Project Gutenberg"
+        }
+      }
+    },
+    {
+      "name": "the failed attempt is recorded",
+      "path": "/ingest/status/99999999",
+      "status": 200,
+      "body": {
+        "book_id": 99999999,
+        "status": "failed"
+      }
+    },
+    {
+      "name": "ingest with an invalid id",
+      "method": "POST",
+      "path": "/ingest/abc",
+      "status": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_PARAMETER",
+          "message": "book_id must be a positive integer"
+        }
+      }
+    },
+    {
+      "name": "list still has only the 20 available books",
+      "path": "/ingest/list",
+      "status": 200,
+      "body": {
+        "count": 20
+      }
+    }
+  ]
+}
