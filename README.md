@@ -100,14 +100,17 @@ Example (PowerShell): `$env:SEARCH_PORT=8003; java -jar search-service/target/se
 ## API checks
 
 [`api-tests/`](api-tests/README.md) holds automated HTTP checks of the APIs with their expected
-results. They run on every `mvn clean verify`, and can also be run against a running service:
+results. The Search checks over a fixture run on every `mvn clean verify`. The end-to-end checks
+start the whole system from its jars, load the fixed corpus and check the front-end and internal
+APIs, including the exact `book_id`s returned for every query word:
 
 ```bash
+java -jar api-tests/target/api-tests.jar pipeline          # 39/39 checks passed
 java -jar api-tests/target/api-tests.jar check http://localhost:7003 api-tests/cases/search.json
 ```
 
-See [`api-tests/README.md`](api-tests/README.md) for the fixture data, the full procedure and what
-each case file checks.
+See [`api-tests/README.md`](api-tests/README.md) for the procedures, the data and what each case
+file checks.
 
 ## Fixed corpus
 
