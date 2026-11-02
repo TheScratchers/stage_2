@@ -23,3 +23,6 @@ activemq-data/
 # The final report lives under docs/ and IS versioned.
 /*.pdf
 /*.png
+
+# Throw-away results of a trial benchmark run (benchmarks/README.md)
+trial-results/

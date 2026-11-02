@@ -131,7 +131,16 @@ mvn -pl indexing-service -Pjmh test-compile exec:exec -Djmh.args="-rf csv -rff j
 
 `benchmarks/load-client` sends concurrent searches to one or more Search replicas and records
 every request, the p50/p95/p99 latencies per concurrency level, the exact command and the host
-description. See [`benchmarks/README.md`](benchmarks/README.md).
+description. `benchmarks/integration` runs every integration experiment of the report on the real
+system with one command (search latency with 1 and 2 replicas, indexing throughput with 1 to 4
+workers and 2 replicas, coordination cost, CPU, memory and disk per process):
+
+```bash
+java -jar benchmarks/integration/target/integration-bench.jar
+```
+
+See [`benchmarks/README.md`](benchmarks/README.md) for the experiments, the result files and the
+procedure for the official run.
 
 ## Technology versions
 

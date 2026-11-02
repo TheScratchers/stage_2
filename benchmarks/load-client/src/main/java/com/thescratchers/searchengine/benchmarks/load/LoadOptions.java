@@ -90,7 +90,7 @@ public record LoadOptions(List<String> targets, List<Integer> clientLevels, Dura
     }
 
     /** Reads one query word per line, skipping blank lines and {@code #} comments. */
-    static List<String> readQueries(Path file) throws IOException {
+    public static List<String> readQueries(Path file) throws IOException {
         List<String> queries = Files.readAllLines(file, StandardCharsets.UTF_8).stream()
                 .map(String::strip)
                 .filter(line -> !line.isEmpty() && !line.startsWith("#"))

@@ -65,9 +65,14 @@ public final class ResultWriter {
 
     /** Writes {@code host.txt} with the machine and JVM that ran the load client. */
     public void writeHost() throws IOException {
+        Files.writeString(dir.resolve("host.txt"), hostDescription(), StandardCharsets.UTF_8);
+    }
+
+    /** Description of this machine and JVM: OS, CPU model, logical processors, memory and Java version. */
+    public static String hostDescription() {
         com.sun.management.OperatingSystemMXBean os =
                 ManagementFactory.getPlatformMXBean(com.sun.management.OperatingSystemMXBean.class);
-        String text = "os: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
+        return "os: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
                 + " (" + System.getProperty("os.arch") + ")\n"
                 + "cpu: " + cpuModel() + "\n"
                 + "logical_processors: " + Runtime.getRuntime().availableProcessors() + "\n"
@@ -75,7 +80,6 @@ public final class ResultWriter {
                 + "java: " + System.getProperty("java.vm.vendor") + " " + System.getProperty("java.vm.name")
                 + " " + System.getProperty("java.runtime.version") + "\n"
                 + "load_client_max_heap_mb: " + Runtime.getRuntime().maxMemory() / (1024 * 1024) + "\n";
-        Files.writeString(dir.resolve("host.txt"), text, StandardCharsets.UTF_8);
     }
 
     /** Quotes a CSV field when it contains a comma, a quote or a line break. */

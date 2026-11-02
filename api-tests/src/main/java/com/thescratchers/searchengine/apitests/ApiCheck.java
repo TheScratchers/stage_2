@@ -127,7 +127,7 @@ public final class ApiCheck {
     }
 
     /** Reads one Gutenberg id per line, skipping blank lines and {@code #} comments. */
-    static List<Integer> readBookIds(Path file) throws IOException {
+    public static List<Integer> readBookIds(Path file) throws IOException {
         List<Integer> ids = new ArrayList<>();
         for (String line : Files.readAllLines(file, StandardCharsets.UTF_8)) {
             String trimmed = line.strip();
