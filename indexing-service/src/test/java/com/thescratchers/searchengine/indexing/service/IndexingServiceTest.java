@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -39,7 +40,7 @@ class IndexingServiceTest {
         Path ingestionDb = tempDir.resolve("ingestion.db");
         log = new IngestionLogFixture(ingestionDb);
         store = new DatamartStore(tempDir.resolve("datamart.db"));
-        service = new IndexingService(new IngestionLogReader(ingestionDb), new BookIndexer(store), store);
+        service = new IndexingService(new IngestionLogReader(ingestionDb), new BookIndexer(store), store, IndexListener.NONE);
     }
 
     @Test
@@ -120,7 +121,7 @@ class IndexingServiceTest {
                 return List.of();
             }
         };
-        IndexingService slow = new IndexingService(slowSource, new BookIndexer(store), store);
+        IndexingService slow = new IndexingService(slowSource, new BookIndexer(store), store, IndexListener.NONE);
 
         CompletableFuture<RebuildResult> first = CompletableFuture.supplyAsync(() -> {
             try {
@@ -151,5 +152,19 @@ class IndexingServiceTest {
         assertEquals(1, status.booksIndexed());
         assertNotNull(status.lastUpdate());
         assertTrue(status.sizeBytes() > 0);
+    }
+
+    @Test
+    void theListenerIsNotifiedOnlyForCommittedBooks() throws Exception {
+        List<Integer> notified = new CopyOnWriteArrayList<>();
+        IndexingService listening = new IndexingService(new IngestionLogReader(tempDir.resolve("ingestion.db")),
+                new BookIndexer(store), store, result -> notified.add(result.bookId()));
+        log.available(1342).available(11).available(7, tempDir.resolve("7.header.txt"), tempDir.resolve("7.body.txt"));
+
+        listening.update(1342);
+        assertThrows(BookNotAvailableException.class, () -> listening.update(999));
+        listening.rebuild();
+
+        assertEquals(List.of(1342, 11, 1342), notified);
     }
 }
