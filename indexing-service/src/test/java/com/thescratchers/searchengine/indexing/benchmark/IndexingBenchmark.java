@@ -21,25 +21,18 @@ import org.openjdk.jmh.annotations.Warmup;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 /**
  * Microbenchmarks of the indexing pipeline on book 1342 (Pride and Prejudice) of the bundled
  * corpus: tokenizing the body, parsing the header and storing the book in the datamart.
  *
- * <p>Run from the repository root with:
- * <pre>
- * mvn -q install -DskipTests
- * mvn -pl indexing-service -Pjmh test-compile exec:exec
- * </pre>
- * The datamart is written to a temporary directory created for each iteration and deleted after
+ * <p>The official runs go through {@link IndexingBenchmarkRun}, which also runs
+ * {@link CorpusIndexingBenchmark}. The datamart is written to a temporary directory created for each iteration and deleted after
  * it; nothing is written under {@code data/}.
  */
 @BenchmarkMode(Mode.AverageTime)
@@ -50,7 +43,6 @@ import java.util.stream.Stream;
 public class IndexingBenchmark {
 
     private static final int BOOK_ID = 1342;
-    private static final Path SAMPLES = Path.of("..", "samples", "books");
 
     /** Book 1342 loaded once per trial, plus the inputs of {@link #indexBook}. */
     @State(Scope.Benchmark)
@@ -64,8 +56,8 @@ public class IndexingBenchmark {
         /** Reads the sample book and precomputes its metadata and term frequencies. */
         @Setup(Level.Trial)
         public void load() throws IOException {
-            header = Files.readString(SAMPLES.resolve(BOOK_ID + ".header.txt"), StandardCharsets.UTF_8);
-            body = Files.readString(SAMPLES.resolve(BOOK_ID + ".body.txt"), StandardCharsets.UTF_8);
+            header = Files.readString(Corpus.header(BOOK_ID), StandardCharsets.UTF_8);
+            body = Files.readString(Corpus.body(BOOK_ID), StandardCharsets.UTF_8);
             ParsedHeader parsed = HeaderParser.parse(header);
             record = new BookRecord(BOOK_ID, parsed.title(), parsed.author(), parsed.language(), parsed.year());
             termFrequencies = new HashMap<>();
@@ -79,24 +71,20 @@ public class IndexingBenchmark {
     @State(Scope.Benchmark)
     public static class DatamartState {
 
-        Path dir;
+        TempDirectory dir;
         DatamartStore store;
 
         /** Creates the temporary directory and the datamart schema. */
         @Setup(Level.Iteration)
         public void open() throws IOException, SQLException {
-            dir = Files.createTempDirectory("indexing-benchmark");
-            store = new DatamartStore(dir.resolve("datamart.db"));
+            dir = TempDirectory.create();
+            store = new DatamartStore(dir.datamart());
         }
 
         /** Deletes the temporary directory with the database and its WAL files. */
         @TearDown(Level.Iteration)
         public void delete() throws IOException {
-            try (Stream<Path> paths = Files.walk(dir)) {
-                for (Path path : paths.sorted(Comparator.reverseOrder()).toList()) {
-                    Files.delete(path);
-                }
-            }
+            dir.close();
         }
     }
 
