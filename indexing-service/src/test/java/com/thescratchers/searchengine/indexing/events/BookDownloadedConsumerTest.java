@@ -11,14 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -73,7 +70,7 @@ class BookDownloadedConsumerTest {
         MessageConsumer indexed = broker.subscribeIndexed();
         start(1);
 
-        broker.sendDownloaded(event(1342));
+        broker.sendDownloaded(TestBroker.downloadedEvent(1342));
 
         JsonObject published = JsonParser.parseString(TestBroker.text(indexed.receive(WAIT_MS))).getAsJsonObject();
         assertEquals("BookIndexed", published.get("event").getAsString());
@@ -89,8 +86,8 @@ class BookDownloadedConsumerTest {
         MessageConsumer indexed = broker.subscribeIndexed();
         start(2);
 
-        broker.sendDownloaded(event(1342));
-        broker.sendDownloaded(event(1342));
+        broker.sendDownloaded(TestBroker.downloadedEvent(1342));
+        broker.sendDownloaded(TestBroker.downloadedEvent(1342));
 
         assertNotNull(indexed.receive(WAIT_MS));
         assertNotNull(indexed.receive(WAIT_MS));
@@ -102,7 +99,7 @@ class BookDownloadedConsumerTest {
     void aBookThatCannotBeIndexedIsRedeliveredAndEndsInTheDeadLetterQueue() throws Exception {
         MessageConsumer indexed = broker.subscribeIndexed();
         start(1);
-        String missing = event(7, tempDir.resolve("7.header.txt"), tempDir.resolve("7.body.txt"));
+        String missing = TestBroker.downloadedEvent(7, tempDir.resolve("7.header.txt"), tempDir.resolve("7.body.txt"));
 
         broker.sendDownloaded(missing);
 
@@ -118,7 +115,7 @@ class BookDownloadedConsumerTest {
 
         broker.sendDownloaded("not json");
         broker.sendDownloaded("{\"event\":\"BookDownloaded\",\"version\":1,\"book_id\":11}");
-        broker.sendDownloaded(event(11));
+        broker.sendDownloaded(TestBroker.downloadedEvent(11));
 
         assertNotNull(indexed.receive(WAIT_MS));
         assertEquals(List.of(11), store.bookIds());
@@ -132,10 +129,10 @@ class BookDownloadedConsumerTest {
     void severalWorkersIndexTheWholeCorpus() throws Exception {
         MessageConsumer indexed = broker.subscribeIndexed();
         start(4);
-        List<Integer> corpus = corpusIds();
+        List<Integer> corpus = IngestionLogFixture.corpusIds();
 
         for (int bookId : corpus) {
-            broker.sendDownloaded(event(bookId));
+            broker.sendDownloaded(bookId);
         }
 
         Set<Integer> published = new HashSet<>();
@@ -165,31 +162,5 @@ class BookDownloadedConsumerTest {
     private void start(int workers) {
         consumer = new BookDownloadedConsumer(broker.url(), new BookIndexer(store), workers);
         consumer.start();
-    }
-
-    private static String event(int bookId) {
-        return event(bookId,
-                IngestionLogFixture.SAMPLES.resolve(bookId + ".header.txt"),
-                IngestionLogFixture.SAMPLES.resolve(bookId + ".body.txt"));
-    }
-
-    private static String event(int bookId, Path header, Path body) {
-        JsonObject json = new JsonObject();
-        json.addProperty("event", "BookDownloaded");
-        json.addProperty("version", 1);
-        json.addProperty("book_id", bookId);
-        json.addProperty("header_path", header.toString());
-        json.addProperty("body_path", body.toString());
-        json.addProperty("ingested_at", "2026-10-28T10:00:00Z");
-        return json.toString();
-    }
-
-    private static List<Integer> corpusIds() throws IOException {
-        try (Stream<Path> files = Files.list(IngestionLogFixture.SAMPLES)) {
-            return files.map(file -> file.getFileName().toString())
-                    .filter(name -> name.endsWith(".header.txt"))
-                    .map(name -> Integer.parseInt(name.substring(0, name.indexOf('.'))))
-                    .toList();
-        }
     }
 }
