@@ -2,11 +2,15 @@ package com.thescratchers.searchengine.indexing;
 
 import com.thescratchers.searchengine.common.Sqlite;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Test double of the Ingestion Service's {@code ingestion.db}: creates the {@code ingestion_log}
@@ -18,6 +22,17 @@ public final class IngestionLogFixture {
     public static final Path SAMPLES = Path.of("..", "samples", "books");
 
     private final Path dbFile;
+
+    /** Ids of the books of the bundled corpus, in ascending order. */
+    public static List<Integer> corpusIds() throws IOException {
+        try (Stream<Path> files = Files.list(SAMPLES)) {
+            return files.map(file -> file.getFileName().toString())
+                    .filter(name -> name.endsWith(".header.txt"))
+                    .map(name -> Integer.parseInt(name.substring(0, name.indexOf('.'))))
+                    .sorted()
+                    .toList();
+        }
+    }
 
     /** Creates the database and the table at {@code dbFile}. */
     public IngestionLogFixture(Path dbFile) throws SQLException {

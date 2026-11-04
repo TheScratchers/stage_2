@@ -1,5 +1,7 @@
 package com.thescratchers.searchengine.indexing.events;
 
+import com.google.gson.JsonObject;
+import com.thescratchers.searchengine.indexing.IngestionLogFixture;
 import jakarta.jms.Connection;
 import jakarta.jms.DeliveryMode;
 import jakarta.jms.JMSException;
@@ -13,8 +15,10 @@ import org.apache.activemq.RedeliveryPolicy;
 import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
+import org.apache.activemq.broker.region.Destination;
 import org.apache.activemq.broker.region.policy.RedeliveryPolicyMap;
 import org.apache.activemq.broker.util.RedeliveryPlugin;
+import org.apache.activemq.command.ActiveMQQueue;
 
 import java.nio.file.Path;
 
@@ -74,6 +78,52 @@ final class TestBroker implements AutoCloseable {
             producer.setDeliveryMode(DeliveryMode.PERSISTENT);
             producer.send(session.createTextMessage(text));
         }
+    }
+
+    /** Sends the {@code BookDownloaded} event of a book of the bundled corpus. */
+    void sendDownloaded(int bookId) throws JMSException {
+        sendDownloaded(downloadedEvent(bookId));
+    }
+
+    /**
+     * Messages of the {@code books.downloaded} queue that have not been acknowledged yet, including
+     * those delivered to a consumer whose transaction is still open.
+     */
+    long pendingDownloaded() throws Exception {
+        return queue(Broker.DOWNLOADED_QUEUE).getDestinationStatistics().getMessages().getCount();
+    }
+
+    /** Consumers currently attached to the {@code books.downloaded} queue (one per worker thread). */
+    int downloadedConsumers() throws Exception {
+        return queue(Broker.DOWNLOADED_QUEUE).getConsumers().size();
+    }
+
+    /** Messages waiting in the dead-letter queue. */
+    long deadLetterCount() throws Exception {
+        return queue(DLQ).getDestinationStatistics().getMessages().getCount();
+    }
+
+    private Destination queue(String name) throws Exception {
+        return broker.getDestination(new ActiveMQQueue(name));
+    }
+
+    /** JSON of the {@code BookDownloaded} event of a corpus book, with absolute paths as Ingestion sends them. */
+    static String downloadedEvent(int bookId) {
+        return downloadedEvent(bookId,
+                IngestionLogFixture.SAMPLES.resolve(bookId + ".header.txt").toAbsolutePath(),
+                IngestionLogFixture.SAMPLES.resolve(bookId + ".body.txt").toAbsolutePath());
+    }
+
+    /** JSON of a {@code BookDownloaded} event with explicit file paths. */
+    static String downloadedEvent(int bookId, Path header, Path body) {
+        JsonObject json = new JsonObject();
+        json.addProperty("event", "BookDownloaded");
+        json.addProperty("version", 1);
+        json.addProperty("book_id", bookId);
+        json.addProperty("header_path", header.toString());
+        json.addProperty("body_path", body.toString());
+        json.addProperty("ingested_at", "2026-10-28T10:00:00Z");
+        return json.toString();
     }
 
     /** Subscribes to the {@code books.indexed} topic; call it before the events are published. */
