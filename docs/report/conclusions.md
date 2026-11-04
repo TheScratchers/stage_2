@@ -1,4 +1,4 @@
-# 8.x Towards the Stage 3 cluster
+# 8.x Conclusions and future improvements: towards the Stage 3 cluster
 
 Stage 2 runs every process on one host. The architecture was chosen so that most of it carries over
 to a cluster: services that talk only through HTTP and broker events, idempotent indexing,
