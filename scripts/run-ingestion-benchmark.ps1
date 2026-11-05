@@ -12,6 +12,6 @@ mvn -pl ingestion-service test-compile -q
 
 Write-Host "Starting Ingestion Benchmark..."
 mvn -pl ingestion-service exec:java `
-  -Dexec.mainClass=com.thescratchers.searchengine.ingestion.benchmark.IngestionBenchmark `
-  -Dexec.classpathScope=test `
-  -Dexec.args="$args"
+  "-Dexec.mainClass=com.thescratchers.searchengine.ingestion.benchmark.IngestionBenchmark" `
+  "-Dexec.classpathScope=test" `
+  "-Dexec.args=$args"
