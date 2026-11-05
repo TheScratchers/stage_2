@@ -319,9 +319,7 @@ memory of the whole Indexing process is in Table 7.x.4.
   its own connection, and when the last connection to a WAL database closes, SQLite checkpoints the
   whole WAL into the database file and deletes it. With one thread and no other open connection,
   that happens after every book. With two or more threads the connections overlap, and the costly
-  checkpoint is mostly avoided. A diagnostic run outside the official measurements, holding one
-  extra connection open during the pass, removed most of the penalty, which supports this
-  explanation. With the default of 2 workers the connections of the service usually overlap, so
+  checkpoint is mostly avoided. With the default of 2 workers the connections of the service usually overlap, so
   the figures with 2 or more threads are the representative ones; a single worker would pay this
   checkpoint after every book.
 - **An unexplained outlier.** `buildCorpus` with 1 thread (3020 ± 988 ms, individual passes from
