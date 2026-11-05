@@ -311,8 +311,8 @@ memory of the whole Indexing process is in Table 7.x.4.
 - **Rebuild and update cost the same.** The complete rebuild takes 1679 ms against 1654 ms for
   re-indexing the same batch with 1 thread (Table 7.y.3): reading the ingestion log and checking
   for removed books is negligible next to the re-indexing itself. With 1 thread both handle about
-  12 books per second, as fast as the whole pipeline with 1 worker (12.3 books/s), which mostly
-  re-indexes books as well. Coordinating through the broker therefore adds little to the cost of
+  12 books per second, as fast as the whole pipeline with 1 worker (12.3 books/s), which also
+  re-indexes books already in the datamart. Coordinating through the broker therefore adds little to the cost of
   indexing a book.
 - **Why one thread is penalised.** With 1 thread, `persistCorpus` is more than twice as slow as
   with 2 (2.21×), which a single writer cannot explain. Each `DatamartStore` call opens and closes
