@@ -1,0 +1,15 @@
+command (from the repository root):
+mvn -q install -DskipTests
+mvn -q -pl indexing-service exec:exec -Dexec.executable=java -Dexec.classpathScope=test "-Dexec.args=-Xms2G -Xmx2G -classpath %classpath com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmarkRun"
+mode: official
+commit: 04132ab
+started_at: 2026-11-05T17:42:12.114184500Z
+finished_at: 2026-11-05T17:53:34.551444400Z
+corpus: samples/books.txt, 20 books, 11290405 bytes of header and body files
+jmh: 1.37, one fork per benchmark, profiler gc (allocation per operation)
+jmh_IndexingBenchmark: average time per operation on book 1342; 5 warm-up and 10 measured iterations of 10 s; fork -Xms2G -Xmx2G
+jmh_CorpusIndexingBenchmark: single-shot time of one pass over the whole corpus; 5 warm-up and 10 measured operations; time limit 2 min per operation; threads 1, 2, 4; fork -Xms2G -Xmx2G, log level warn
+sqlite: journal_mode=WAL, synchronous=NORMAL, busy_timeout=5000 ms, default page cache; datamarts in temporary directories of the system disk
+footprint_jvm: -Xms2G -Xmx2G (max heap 2048 MB)
+number_format: '.' as decimal separator (Locale.ROOT)
+files: jmh.csv (raw JMH results), jmh.txt (JMH log), footprint.csv, host.txt

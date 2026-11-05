@@ -1,0 +1,6 @@
+process,mean_cpu_percent,max_cpu_percent,max_rss_mb
+broker,0.1,4.3,104.8
+indexing-1,0.1,2.8,331.7
+ingestion,0.1,2.8,293.4
+search-1,220.4,485.3,446.3
+search-2,218.1,457.1,442.6

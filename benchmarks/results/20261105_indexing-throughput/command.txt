@@ -1,0 +1,11 @@
+java -jar benchmarks/integration/target/integration-bench.jar 
+
+experiment: indexing-throughput
+started_utc: 2026-11-05T18:04:01.426572200Z
+commit: 04132ab
+service_jvm: -Xmx1g
+corpus: samples/books.txt (20 books, served by a local Gutenberg stand-in)
+queries: samples/words.txt [time, love, heart, nothing, death, truth, fortune, monster, wonderland, darcy]
+sqlite: journal_mode=WAL, synchronous=NORMAL, busy_timeout=5000 (common.Sqlite)
+broker: ActiveMQ 6.3.2 embedded, persistent KahaDB, 5 redeliveries then ActiveMQ.DLQ
+method: For each configuration (Indexing replicas x INDEXING_WORKERS) and repetition: a fresh system loads the corpus (which also warms the JVMs), then 200 BookDownloaded events (10 rounds of the 20 corpus books) are sent straight to the books.downloaded queue and timed until all 200 BookIndexed events have arrived. Re-indexing a book replaces it, so the index must still hold 20 books afterwards (index_ok).

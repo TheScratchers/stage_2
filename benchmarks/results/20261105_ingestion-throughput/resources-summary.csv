@@ -1,0 +1,2 @@
+process,mean_cpu_percent,max_cpu_percent,max_rss_mb
+ingestion-service,7.9,28.2,279.1

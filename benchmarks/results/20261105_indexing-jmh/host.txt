@@ -1,0 +1,5 @@
+os: Windows 11 10.0 (amd64)
+cpu: 13th Gen Intel(R) Core(TM) i7-13700KF
+logical_processors: 24
+memory_gb: 31.9
+java: Eclipse Adoptium OpenJDK 64-Bit Server VM 21.0.12.1+1-LTS

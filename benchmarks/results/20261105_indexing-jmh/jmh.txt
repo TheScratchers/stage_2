@@ -1,0 +1,2073 @@
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, 10 s each
+# Measurement: 10 iterations, 10 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.indexBook
+
+# Run progress: 0.00% complete, ETA 00:07:30
+# Fork: 1 of 1
+# Warmup Iteration   1: 18.607 ms/op
+# Warmup Iteration   2: 18.077 ms/op
+# Warmup Iteration   3: 17.752 ms/op
+# Warmup Iteration   4: 19.105 ms/op
+# Warmup Iteration   5: 18.895 ms/op
+Iteration   1: 27.005 ms/op
+                 gc.alloc.rate:      24.350 MB/sec
+                 gc.alloc.rate.norm: 690848.647 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   2: 27.410 ms/op
+                 gc.alloc.rate:      23.990 MB/sec
+                 gc.alloc.rate.norm: 690848.393 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   3: 27.273 ms/op
+                 gc.alloc.rate:      24.106 MB/sec
+                 gc.alloc.rate.norm: 690847.283 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   4: 27.680 ms/op
+                 gc.alloc.rate:      23.756 MB/sec
+                 gc.alloc.rate.norm: 690848.928 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+
+Iteration   5: 26.780 ms/op
+                 gc.alloc.rate:      24.553 MB/sec
+                 gc.alloc.rate.norm: 690756.642 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   6: 27.153 ms/op
+                 gc.alloc.rate:      24.211 MB/sec
+                 gc.alloc.rate.norm: 690672.650 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   7: 26.764 ms/op
+                 gc.alloc.rate:      24.550 MB/sec
+                 gc.alloc.rate.norm: 690632.128 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   8: 29.138 ms/op
+                 gc.alloc.rate:      22.556 MB/sec
+                 gc.alloc.rate.norm: 690507.395 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   9: 27.102 ms/op
+                 gc.alloc.rate:      24.246 MB/sec
+                 gc.alloc.rate.norm: 690438.854 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration  10: 27.170 ms/op
+                 gc.alloc.rate:      24.185 MB/sec
+                 gc.alloc.rate.norm: 690441.691 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            1.000 ms
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.indexBook":
+  27.347 ±(99.9%) 1.037 ms/op [Average]
+  (min, avg, max) = (26.764, 27.347, 29.138), stdev = 0.686
+  CI (99.9%): [26.310, 28.385] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.indexBook:gc.alloc.rate":
+  24.050 ±(99.9%) 0.873 MB/sec [Average]
+  (min, avg, max) = (22.556, 24.050, 24.553), stdev = 0.577
+  CI (99.9%): [23.178, 24.923] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.indexBook:gc.alloc.rate.norm":
+  690684.261 ±(99.9%) 259.959 B/op [Average]
+  (min, avg, max) = (690438.854, 690684.261, 690848.928), stdev = 171.947
+  CI (99.9%): [690424.302, 690944.220] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.indexBook:gc.count":
+  2.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.200, 1.000), stdev = 0.422
+  CI (99.9%): [2.000, 2.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.indexBook:gc.time":
+  3.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 0.300, 2.000), stdev = 0.675
+  CI (99.9%): [3.000, 3.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, 10 s each
+# Measurement: 10 iterations, 10 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.parseHeader
+
+# Run progress: 33.32% complete, ETA 00:05:02
+# Fork: 1 of 1
+# Warmup Iteration   1: 0.006 ms/op
+# Warmup Iteration   2: 0.006 ms/op
+# Warmup Iteration   3: 0.006 ms/op
+# Warmup Iteration   4: 0.006 ms/op
+# Warmup Iteration   5: 0.006 ms/op
+Iteration   1: 0.006 ms/op
+                 gc.alloc.rate:      567.238 MB/sec
+                 gc.alloc.rate.norm: 3728.004 B/op
+                 gc.count:           5.000 counts
+                 gc.time:            5.000 ms
+
+Iteration   2: 0.006 ms/op
+                 gc.alloc.rate:      567.552 MB/sec
+                 gc.alloc.rate.norm: 3728.004 B/op
+                 gc.count:           5.000 counts
+                 gc.time:            6.000 ms
+
+Iteration   3: 0.006 ms/op
+                 gc.alloc.rate:      567.445 MB/sec
+                 gc.alloc.rate.norm: 3728.004 B/op
+                 gc.count:           4.000 counts
+                 gc.time:            4.000 ms
+
+Iteration   4: 0.006 ms/op
+                 gc.alloc.rate:      567.025 MB/sec
+                 gc.alloc.rate.norm: 3728.004 B/op
+                 gc.count:           5.000 counts
+                 gc.time:            6.000 ms
+
+Iteration   5: 0.006 ms/op
+                 gc.alloc.rate:      566.712 MB/sec
+                 gc.alloc.rate.norm: 3728.004 B/op
+                 gc.count:           5.000 counts
+                 gc.time:            6.000 ms
+
+Iteration   6: 0.006 ms/op
+                 gc.alloc.rate:      566.649 MB/sec
+                 gc.alloc.rate.norm: 3728.004 B/op
+                 gc.count:           4.000 counts
+                 gc.time:            5.000 ms
+
+Iteration   7: 0.006 ms/op
+                 gc.alloc.rate:      566.378 MB/sec
+                 gc.alloc.rate.norm: 3728.004 B/op
+                 gc.count:           5.000 counts
+                 gc.time:            5.000 ms
+
+Iteration   8: 0.006 ms/op
+                 gc.alloc.rate:      567.936 MB/sec
+                 gc.alloc.rate.norm: 3728.004 B/op
+                 gc.count:           4.000 counts
+                 gc.time:            5.000 ms
+
+Iteration   9: 0.006 ms/op
+                 gc.alloc.rate:      570.658 MB/sec
+                 gc.alloc.rate.norm: 3728.004 B/op
+                 gc.count:           5.000 counts
+                 gc.time:            6.000 ms
+
+Iteration  10: 0.006 ms/op
+                 gc.alloc.rate:      569.470 MB/sec
+                 gc.alloc.rate.norm: 3728.004 B/op
+                 gc.count:           5.000 counts
+                 gc.time:            6.000 ms
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.parseHeader":
+  0.006 ±(99.9%) 0.001 ms/op [Average]
+  (min, avg, max) = (0.006, 0.006, 0.006), stdev = 0.001
+  CI (99.9%): [0.006, 0.006] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.parseHeader:gc.alloc.rate":
+  567.706 ±(99.9%) 2.048 MB/sec [Average]
+  (min, avg, max) = (566.378, 567.706, 570.658), stdev = 1.355
+  CI (99.9%): [565.658, 569.755] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.parseHeader:gc.alloc.rate.norm":
+  3728.004 ±(99.9%) 0.001 B/op [Average]
+  (min, avg, max) = (3728.004, 3728.004, 3728.004), stdev = 0.001
+  CI (99.9%): [3728.004, 3728.004] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.parseHeader:gc.count":
+  47.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (4.000, 4.700, 5.000), stdev = 0.483
+  CI (99.9%): [47.000, 47.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.parseHeader:gc.time":
+  54.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (4.000, 5.400, 6.000), stdev = 0.699
+  CI (99.9%): [54.000, 54.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, 10 s each
+# Measurement: 10 iterations, 10 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.tokenize
+
+# Run progress: 66.64% complete, ETA 00:02:30
+# Fork: 1 of 1
+# Warmup Iteration   1: 8.059 ms/op
+# Warmup Iteration   2: 8.091 ms/op
+# Warmup Iteration   3: 8.114 ms/op
+# Warmup Iteration   4: 8.101 ms/op
+# Warmup Iteration   5: 8.014 ms/op
+Iteration   1: 7.997 ms/op
+                 gc.alloc.rate:      1152.434 MB/sec
+                 gc.alloc.rate.norm: 9663493.572 B/op
+                 gc.count:           50.000 counts
+                 gc.time:            663.000 ms
+
+Iteration   2: 8.051 ms/op
+                 gc.alloc.rate:      1144.715 MB/sec
+                 gc.alloc.rate.norm: 9663493.586 B/op
+                 gc.count:           54.000 counts
+                 gc.time:            705.000 ms
+
+Iteration   3: 8.070 ms/op
+                 gc.alloc.rate:      1141.995 MB/sec
+                 gc.alloc.rate.norm: 9663493.595 B/op
+                 gc.count:           51.000 counts
+                 gc.time:            682.000 ms
+
+Iteration   4: 8.081 ms/op
+                 gc.alloc.rate:      1140.342 MB/sec
+                 gc.alloc.rate.norm: 9663493.609 B/op
+                 gc.count:           54.000 counts
+                 gc.time:            701.000 ms
+
+Iteration   5: 8.086 ms/op
+                 gc.alloc.rate:      1139.710 MB/sec
+                 gc.alloc.rate.norm: 9663493.609 B/op
+                 gc.count:           51.000 counts
+                 gc.time:            695.000 ms
+
+Iteration   6: 8.103 ms/op
+                 gc.alloc.rate:      1137.361 MB/sec
+                 gc.alloc.rate.norm: 9663493.618 B/op
+                 gc.count:           50.000 counts
+                 gc.time:            668.000 ms
+
+Iteration   7: 8.131 ms/op
+                 gc.alloc.rate:      1133.385 MB/sec
+                 gc.alloc.rate.norm: 9663493.662 B/op
+                 gc.count:           54.000 counts
+                 gc.time:            714.000 ms
+
+Iteration   8: 8.094 ms/op
+                 gc.alloc.rate:      1138.541 MB/sec
+                 gc.alloc.rate.norm: 9663493.609 B/op
+                 gc.count:           50.000 counts
+                 gc.time:            673.000 ms
+
+Iteration   9: 8.110 ms/op
+                 gc.alloc.rate:      1136.365 MB/sec
+                 gc.alloc.rate.norm: 9663493.623 B/op
+                 gc.count:           51.000 counts
+                 gc.time:            692.000 ms
+
+Iteration  10: 8.129 ms/op
+                 gc.alloc.rate:      1133.701 MB/sec
+                 gc.alloc.rate.norm: 9663493.641 B/op
+                 gc.count:           50.000 counts
+                 gc.time:            669.000 ms
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.tokenize":
+  8.085 ±(99.9%) 0.060 ms/op [Average]
+  (min, avg, max) = (7.997, 8.085, 8.131), stdev = 0.040
+  CI (99.9%): [8.025, 8.145] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.tokenize:gc.alloc.rate":
+  1139.855 ±(99.9%) 8.531 MB/sec [Average]
+  (min, avg, max) = (1133.385, 1139.855, 1152.434), stdev = 5.643
+  CI (99.9%): [1131.324, 1148.386] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.tokenize:gc.alloc.rate.norm":
+  9663493.613 ±(99.9%) 0.039 B/op [Average]
+  (min, avg, max) = (9663493.572, 9663493.613, 9663493.662), stdev = 0.026
+  CI (99.9%): [9663493.573, 9663493.652] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.tokenize:gc.count":
+  515.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (50.000, 51.500, 54.000), stdev = 1.780
+  CI (99.9%): [515.000, 515.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.IndexingBenchmark.tokenize:gc.time":
+  6862.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (663.000, 686.200, 714.000), stdev = 17.681
+  CI (99.9%): [6862.000, 6862.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, single-shot each
+# Measurement: 10 iterations, single-shot each
+# Timeout: 2 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus
+# Parameters: (threads = 1)
+
+# Run progress: 99.96% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 237.551 ms/op
+# Warmup Iteration   2: 224.526 ms/op
+# Warmup Iteration   3: 230.141 ms/op
+# Warmup Iteration   4: 227.123 ms/op
+# Warmup Iteration   5: 228.878 ms/op
+Iteration   1: 222.886 ms/op
+                 gc.alloc.rate:      1021.477 MB/sec
+                 gc.alloc.rate.norm: 238878672.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   2: 235.711 ms/op
+                 gc.alloc.rate:      966.017 MB/sec
+                 gc.alloc.rate.norm: 238878328.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   3: 240.817 ms/op
+                 gc.alloc.rate:      945.570 MB/sec
+                 gc.alloc.rate.norm: 238878472.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            19.000 ms
+
+Iteration   4: 233.684 ms/op
+                 gc.alloc.rate:      974.206 MB/sec
+                 gc.alloc.rate.norm: 238878504.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            18.000 ms
+
+Iteration   5: 226.639 ms/op
+                 gc.alloc.rate:      1004.474 MB/sec
+                 gc.alloc.rate.norm: 238878384.000 B/op
+                 gc.count:           4.000 counts
+                 gc.time:            14.000 ms
+
+Iteration   6: 213.162 ms/op
+                 gc.alloc.rate:      1067.314 MB/sec
+                 gc.alloc.rate.norm: 238878328.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   7: 211.510 ms/op
+                 gc.alloc.rate:      1076.316 MB/sec
+                 gc.alloc.rate.norm: 238878328.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   8: 230.610 ms/op
+                 gc.alloc.rate:      987.357 MB/sec
+                 gc.alloc.rate.norm: 238878384.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            17.000 ms
+
+Iteration   9: 212.282 ms/op
+                 gc.alloc.rate:      1072.549 MB/sec
+                 gc.alloc.rate.norm: 238878328.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration  10: 215.339 ms/op
+                 gc.alloc.rate:      1056.978 MB/sec
+                 gc.alloc.rate.norm: 238881408.000 B/op
+                 gc.count:           ≈ 0 counts
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus":
+  N = 10
+  mean =    224.264 ±(99.9%) 16.336 ms/op
+
+  Histogram, ms/op:
+    [210.000, 212.500) = 2 
+    [212.500, 215.000) = 1 
+    [215.000, 217.500) = 1 
+    [217.500, 220.000) = 0 
+    [220.000, 222.500) = 0 
+    [222.500, 225.000) = 1 
+    [225.000, 227.500) = 1 
+    [227.500, 230.000) = 0 
+    [230.000, 232.500) = 1 
+    [232.500, 235.000) = 1 
+    [235.000, 237.500) = 1 
+    [237.500, 240.000) = 0 
+    [240.000, 242.500) = 1 
+    [242.500, 245.000) = 0 
+    [245.000, 247.500) = 0 
+
+  Percentiles, ms/op:
+      p(0.0000) =    211.510 ms/op
+     p(50.0000) =    224.762 ms/op
+     p(90.0000) =    240.306 ms/op
+     p(95.0000) =    240.817 ms/op
+     p(99.0000) =    240.817 ms/op
+     p(99.9000) =    240.817 ms/op
+     p(99.9900) =    240.817 ms/op
+     p(99.9990) =    240.817 ms/op
+     p(99.9999) =    240.817 ms/op
+    p(100.0000) =    240.817 ms/op
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus:gc.alloc.rate":
+  1017.226 ±(99.9%) 73.587 MB/sec [Average]
+  (min, avg, max) = (945.570, 1017.226, 1076.316), stdev = 48.673
+  CI (99.9%): [943.639, 1090.813] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus:gc.alloc.rate.norm":
+  238878713.600 ±(99.9%) 1440.973 B/op [Average]
+  (min, avg, max) = (238878328.000, 238878713.600, 238881408.000), stdev = 953.115
+  CI (99.9%): [238877272.627, 238880154.573] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus:gc.count":
+  7.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.700, 4.000), stdev = 1.252
+  CI (99.9%): [7.000, 7.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus:gc.time":
+  68.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 6.800, 19.000), stdev = 8.867
+  CI (99.9%): [68.000, 68.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, single-shot each
+# Measurement: 10 iterations, single-shot each
+# Timeout: 2 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus
+# Parameters: (threads = 2)
+
+# Run progress: 99.96% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 124.795 ms/op
+# Warmup Iteration   2: 112.151 ms/op
+# Warmup Iteration   3: 118.283 ms/op
+# Warmup Iteration   4: 112.516 ms/op
+# Warmup Iteration   5: 125.758 ms/op
+Iteration   1: 106.583 ms/op
+                 gc.alloc.rate:      2134.269 MB/sec
+                 gc.alloc.rate.norm: 238878496.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   2: 135.358 ms/op
+                 gc.alloc.rate:      1681.065 MB/sec
+                 gc.alloc.rate.norm: 238878296.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            16.000 ms
+
+Iteration   3: 103.213 ms/op
+                 gc.alloc.rate:      2204.762 MB/sec
+                 gc.alloc.rate.norm: 238878304.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   4: 116.782 ms/op
+                 gc.alloc.rate:      1948.737 MB/sec
+                 gc.alloc.rate.norm: 238878480.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            14.000 ms
+
+Iteration   5: 128.342 ms/op
+                 gc.alloc.rate:      1771.988 MB/sec
+                 gc.alloc.rate.norm: 238878248.000 B/op
+                 gc.count:           4.000 counts
+                 gc.time:            16.000 ms
+
+Iteration   6: 103.369 ms/op
+                 gc.alloc.rate:      2200.608 MB/sec
+                 gc.alloc.rate.norm: 238878216.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   7: 121.507 ms/op
+                 gc.alloc.rate:      1872.544 MB/sec
+                 gc.alloc.rate.norm: 238878272.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            16.000 ms
+
+Iteration   8: 103.323 ms/op
+                 gc.alloc.rate:      2202.351 MB/sec
+                 gc.alloc.rate.norm: 238878216.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   9: 111.113 ms/op
+                 gc.alloc.rate:      2047.909 MB/sec
+                 gc.alloc.rate.norm: 238878216.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration  10: 124.288 ms/op
+                 gc.alloc.rate:      1829.806 MB/sec
+                 gc.alloc.rate.norm: 238882296.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            20.000 ms
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus":
+  N = 10
+  mean =    115.388 ±(99.9%) 17.597 ms/op
+
+  Histogram, ms/op:
+    [100.000, 102.500) = 0 
+    [102.500, 105.000) = 3 
+    [105.000, 107.500) = 1 
+    [107.500, 110.000) = 0 
+    [110.000, 112.500) = 1 
+    [112.500, 115.000) = 0 
+    [115.000, 117.500) = 1 
+    [117.500, 120.000) = 0 
+    [120.000, 122.500) = 1 
+    [122.500, 125.000) = 1 
+    [125.000, 127.500) = 0 
+    [127.500, 130.000) = 1 
+    [130.000, 132.500) = 0 
+    [132.500, 135.000) = 0 
+    [135.000, 137.500) = 1 
+
+  Percentiles, ms/op:
+      p(0.0000) =    103.213 ms/op
+     p(50.0000) =    113.948 ms/op
+     p(90.0000) =    134.656 ms/op
+     p(95.0000) =    135.358 ms/op
+     p(99.0000) =    135.358 ms/op
+     p(99.9000) =    135.358 ms/op
+     p(99.9900) =    135.358 ms/op
+     p(99.9990) =    135.358 ms/op
+     p(99.9999) =    135.358 ms/op
+    p(100.0000) =    135.358 ms/op
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus:gc.alloc.rate":
+  1989.404 ±(99.9%) 295.518 MB/sec [Average]
+  (min, avg, max) = (1681.065, 1989.404, 2204.762), stdev = 195.467
+  CI (99.9%): [1693.886, 2284.922] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus:gc.alloc.rate.norm":
+  238878704.000 ±(99.9%) 1914.446 B/op [Average]
+  (min, avg, max) = (238878216.000, 238878704.000, 238882296.000), stdev = 1266.288
+  CI (99.9%): [238876789.554, 238880618.446] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus:gc.count":
+  8.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.800, 4.000), stdev = 1.229
+  CI (99.9%): [8.000, 8.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus:gc.time":
+  82.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 8.200, 20.000), stdev = 8.766
+  CI (99.9%): [82.000, 82.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, single-shot each
+# Measurement: 10 iterations, single-shot each
+# Timeout: 2 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus
+# Parameters: (threads = 4)
+
+# Run progress: 99.96% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 74.705 ms/op
+# Warmup Iteration   2: 65.583 ms/op
+# Warmup Iteration   3: 70.019 ms/op
+# Warmup Iteration   4: 68.139 ms/op
+# Warmup Iteration   5: 76.141 ms/op
+Iteration   1: 56.551 ms/op
+                 gc.alloc.rate:      4018.301 MB/sec
+                 gc.alloc.rate.norm: 238878560.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   2: 64.325 ms/op
+                 gc.alloc.rate:      3534.529 MB/sec
+                 gc.alloc.rate.norm: 238878264.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            10.000 ms
+
+Iteration   3: 71.058 ms/op
+                 gc.alloc.rate:      3199.825 MB/sec
+                 gc.alloc.rate.norm: 238878352.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            14.000 ms
+
+Iteration   4: 68.240 ms/op
+                 gc.alloc.rate:      3331.708 MB/sec
+                 gc.alloc.rate.norm: 238878376.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            13.000 ms
+
+Iteration   5: 64.586 ms/op
+                 gc.alloc.rate:      3519.600 MB/sec
+                 gc.alloc.rate.norm: 238878264.000 B/op
+                 gc.count:           3.000 counts
+                 gc.time:            8.000 ms
+
+Iteration   6: 57.557 ms/op
+                 gc.alloc.rate:      3949.057 MB/sec
+                 gc.alloc.rate.norm: 238878208.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   7: 60.320 ms/op
+                 gc.alloc.rate:      3764.063 MB/sec
+                 gc.alloc.rate.norm: 238878208.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   8: 75.876 ms/op
+                 gc.alloc.rate:      2996.987 MB/sec
+                 gc.alloc.rate.norm: 238878288.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            19.000 ms
+
+Iteration   9: 54.600 ms/op
+                 gc.alloc.rate:      4162.060 MB/sec
+                 gc.alloc.rate.norm: 238878208.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration  10: 60.193 ms/op
+                 gc.alloc.rate:      3768.760 MB/sec
+                 gc.alloc.rate.norm: 238881904.000 B/op
+                 gc.count:           ≈ 0 counts
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus":
+  N = 10
+  mean =     63.331 ±(99.9%) 10.306 ms/op
+
+  Histogram, ms/op:
+    [50.000, 52.500) = 0 
+    [52.500, 55.000) = 1 
+    [55.000, 57.500) = 1 
+    [57.500, 60.000) = 1 
+    [60.000, 62.500) = 2 
+    [62.500, 65.000) = 2 
+    [65.000, 67.500) = 0 
+    [67.500, 70.000) = 1 
+    [70.000, 72.500) = 1 
+    [72.500, 75.000) = 0 
+    [75.000, 77.500) = 1 
+
+  Percentiles, ms/op:
+      p(0.0000) =     54.600 ms/op
+     p(50.0000) =     62.322 ms/op
+     p(90.0000) =     75.394 ms/op
+     p(95.0000) =     75.876 ms/op
+     p(99.0000) =     75.876 ms/op
+     p(99.9000) =     75.876 ms/op
+     p(99.9900) =     75.876 ms/op
+     p(99.9990) =     75.876 ms/op
+     p(99.9999) =     75.876 ms/op
+    p(100.0000) =     75.876 ms/op
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus:gc.alloc.rate":
+  3624.489 ±(99.9%) 567.618 MB/sec [Average]
+  (min, avg, max) = (2996.987, 3624.489, 4162.060), stdev = 375.444
+  CI (99.9%): [3056.871, 4192.107] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus:gc.alloc.rate.norm":
+  238878663.200 ±(99.9%) 1729.217 B/op [Average]
+  (min, avg, max) = (238878208.000, 238878663.200, 238881904.000), stdev = 1143.770
+  CI (99.9%): [238876933.983, 238880392.417] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus:gc.count":
+  7.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.700, 3.000), stdev = 0.949
+  CI (99.9%): [7.000, 7.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.analyseCorpus:gc.time":
+  64.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 6.400, 19.000), stdev = 7.306
+  CI (99.9%): [64.000, 64.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, single-shot each
+# Measurement: 10 iterations, single-shot each
+# Timeout: 2 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus
+# Parameters: (threads = 1)
+
+# Run progress: 99.97% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 2611.231 ms/op
+# Warmup Iteration   2: 3890.419 ms/op
+# Warmup Iteration   3: 2574.296 ms/op
+# Warmup Iteration   4: 1820.022 ms/op
+# Warmup Iteration   5: 2849.127 ms/op
+Iteration   1: 3570.843 ms/op
+                 gc.alloc.rate:      67.302 MB/sec
+                 gc.alloc.rate.norm: 254119536.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            17.000 ms
+
+Iteration   2: 2768.715 ms/op
+                 gc.alloc.rate:      82.416 MB/sec
+                 gc.alloc.rate.norm: 254118976.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   3: 3060.457 ms/op
+                 gc.alloc.rate:      75.034 MB/sec
+                 gc.alloc.rate.norm: 254119008.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            15.000 ms
+
+Iteration   4: 3792.338 ms/op
+                 gc.alloc.rate:      61.122 MB/sec
+                 gc.alloc.rate.norm: 254119112.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            15.000 ms
+
+Iteration   5: 2250.851 ms/op
+                 gc.alloc.rate:      99.395 MB/sec
+                 gc.alloc.rate.norm: 254118872.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            15.000 ms
+
+Iteration   6: 3066.991 ms/op
+                 gc.alloc.rate:      76.335 MB/sec
+                 gc.alloc.rate.norm: 254119232.000 B/op
+                 gc.count:           4.000 counts
+                 gc.time:            15.000 ms
+
+Iteration   7: 3833.738 ms/op
+                 gc.alloc.rate:      59.476 MB/sec
+                 gc.alloc.rate.norm: 254119104.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   8: 2114.052 ms/op
+                 gc.alloc.rate:      112.132 MB/sec
+                 gc.alloc.rate.norm: 254119568.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   9: 3488.850 ms/op
+                 gc.alloc.rate:      68.941 MB/sec
+                 gc.alloc.rate.norm: 254118792.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            18.000 ms
+
+Iteration  10: 2256.143 ms/op
+                 gc.alloc.rate:      105.602 MB/sec
+                 gc.alloc.rate.norm: 254122456.000 B/op
+                 gc.count:           ≈ 0 counts
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus":
+  N = 10
+  mean =   3020.298 ±(99.9%) 988.148 ms/op
+
+  Histogram, ms/op:
+    [2000.000, 2125.000) = 1 
+    [2125.000, 2250.000) = 0 
+    [2250.000, 2375.000) = 2 
+    [2375.000, 2500.000) = 0 
+    [2500.000, 2625.000) = 0 
+    [2625.000, 2750.000) = 0 
+    [2750.000, 2875.000) = 1 
+    [2875.000, 3000.000) = 0 
+    [3000.000, 3125.000) = 2 
+    [3125.000, 3250.000) = 0 
+    [3250.000, 3375.000) = 0 
+    [3375.000, 3500.000) = 1 
+    [3500.000, 3625.000) = 1 
+    [3625.000, 3750.000) = 0 
+    [3750.000, 3875.000) = 2 
+
+  Percentiles, ms/op:
+      p(0.0000) =   2114.052 ms/op
+     p(50.0000) =   3063.724 ms/op
+     p(90.0000) =   3829.598 ms/op
+     p(95.0000) =   3833.738 ms/op
+     p(99.0000) =   3833.738 ms/op
+     p(99.9000) =   3833.738 ms/op
+     p(99.9900) =   3833.738 ms/op
+     p(99.9990) =   3833.738 ms/op
+     p(99.9999) =   3833.738 ms/op
+    p(100.0000) =   3833.738 ms/op
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus:gc.alloc.rate":
+  80.775 ±(99.9%) 28.343 MB/sec [Average]
+  (min, avg, max) = (59.476, 80.775, 112.132), stdev = 18.747
+  CI (99.9%): [52.432, 109.119] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus:gc.alloc.rate.norm":
+  254119465.600 ±(99.9%) 1634.818 B/op [Average]
+  (min, avg, max) = (254118792.000, 254119465.600, 254122456.000), stdev = 1081.331
+  CI (99.9%): [254117830.782, 254121100.418] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus:gc.count":
+  9.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.900, 4.000), stdev = 1.197
+  CI (99.9%): [9.000, 9.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus:gc.time":
+  95.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 9.500, 18.000), stdev = 8.236
+  CI (99.9%): [95.000, 95.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, single-shot each
+# Measurement: 10 iterations, single-shot each
+# Timeout: 2 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus
+# Parameters: (threads = 2)
+
+# Run progress: 99.97% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 915.364 ms/op
+# Warmup Iteration   2: 995.507 ms/op
+# Warmup Iteration   3: 980.803 ms/op
+# Warmup Iteration   4: 1057.712 ms/op
+# Warmup Iteration   5: 1402.216 ms/op
+Iteration   1: 1025.317 ms/op
+                 gc.alloc.rate:      190.346 MB/sec
+                 gc.alloc.rate.norm: 254119200.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   2: 972.257 ms/op
+                 gc.alloc.rate:      242.604 MB/sec
+                 gc.alloc.rate.norm: 254118648.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            25.000 ms
+
+Iteration   3: 929.890 ms/op
+                 gc.alloc.rate:      235.923 MB/sec
+                 gc.alloc.rate.norm: 254118936.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   4: 1374.156 ms/op
+                 gc.alloc.rate:      172.363 MB/sec
+                 gc.alloc.rate.norm: 254118808.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            14.000 ms
+
+Iteration   5: 771.621 ms/op
+                 gc.alloc.rate:      302.084 MB/sec
+                 gc.alloc.rate.norm: 254119128.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            12.000 ms
+
+Iteration   6: 1055.852 ms/op
+                 gc.alloc.rate:      222.991 MB/sec
+                 gc.alloc.rate.norm: 254119072.000 B/op
+                 gc.count:           5.000 counts
+                 gc.time:            27.000 ms
+
+Iteration   7: 1256.516 ms/op
+                 gc.alloc.rate:      188.717 MB/sec
+                 gc.alloc.rate.norm: 254118624.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   8: 1559.827 ms/op
+                 gc.alloc.rate:      145.897 MB/sec
+                 gc.alloc.rate.norm: 254119528.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   9: 1207.188 ms/op
+                 gc.alloc.rate:      175.339 MB/sec
+                 gc.alloc.rate.norm: 254122064.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            16.000 ms
+
+Iteration  10: 1118.530 ms/op
+                 gc.alloc.rate:      209.873 MB/sec
+                 gc.alloc.rate.norm: 254121048.000 B/op
+                 gc.count:           ≈ 0 counts
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus":
+  N = 10
+  mean =   1127.116 ±(99.9%) 347.762 ms/op
+
+  Histogram, ms/op:
+    [ 700.000,  750.000) = 0 
+    [ 750.000,  800.000) = 1 
+    [ 800.000,  850.000) = 0 
+    [ 850.000,  900.000) = 0 
+    [ 900.000,  950.000) = 1 
+    [ 950.000, 1000.000) = 1 
+    [1000.000, 1050.000) = 1 
+    [1050.000, 1100.000) = 1 
+    [1100.000, 1150.000) = 1 
+    [1150.000, 1200.000) = 0 
+    [1200.000, 1250.000) = 1 
+    [1250.000, 1300.000) = 1 
+    [1300.000, 1350.000) = 0 
+    [1350.000, 1400.000) = 1 
+    [1400.000, 1450.000) = 0 
+    [1450.000, 1500.000) = 0 
+    [1500.000, 1550.000) = 0 
+
+  Percentiles, ms/op:
+      p(0.0000) =    771.621 ms/op
+     p(50.0000) =   1087.191 ms/op
+     p(90.0000) =   1541.260 ms/op
+     p(95.0000) =   1559.827 ms/op
+     p(99.0000) =   1559.827 ms/op
+     p(99.9000) =   1559.827 ms/op
+     p(99.9900) =   1559.827 ms/op
+     p(99.9990) =   1559.827 ms/op
+     p(99.9999) =   1559.827 ms/op
+    p(100.0000) =   1559.827 ms/op
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus:gc.alloc.rate":
+  208.614 ±(99.9%) 67.482 MB/sec [Average]
+  (min, avg, max) = (145.897, 208.614, 302.084), stdev = 44.635
+  CI (99.9%): [141.132, 276.095] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus:gc.alloc.rate.norm":
+  254119505.600 ±(99.9%) 1721.769 B/op [Average]
+  (min, avg, max) = (254118624.000, 254119505.600, 254122064.000), stdev = 1138.843
+  CI (99.9%): [254117783.831, 254121227.369] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus:gc.count":
+  9.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.900, 5.000), stdev = 1.524
+  CI (99.9%): [9.000, 9.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus:gc.time":
+  94.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 9.400, 27.000), stdev = 10.885
+  CI (99.9%): [94.000, 94.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, single-shot each
+# Measurement: 10 iterations, single-shot each
+# Timeout: 2 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus
+# Parameters: (threads = 4)
+
+# Run progress: 99.97% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 1065.752 ms/op
+# Warmup Iteration   2: 912.399 ms/op
+# Warmup Iteration   3: 866.316 ms/op
+# Warmup Iteration   4: 711.460 ms/op
+# Warmup Iteration   5: 923.257 ms/op
+Iteration   1: 1194.914 ms/op
+                 gc.alloc.rate:      169.303 MB/sec
+                 gc.alloc.rate.norm: 254119264.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   2: 1452.044 ms/op
+                 gc.alloc.rate:      141.724 MB/sec
+                 gc.alloc.rate.norm: 254118592.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            21.000 ms
+
+Iteration   3: 743.724 ms/op
+                 gc.alloc.rate:      317.139 MB/sec
+                 gc.alloc.rate.norm: 254118528.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            13.000 ms
+
+Iteration   4: 728.774 ms/op
+                 gc.alloc.rate:      322.559 MB/sec
+                 gc.alloc.rate.norm: 254118976.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            13.000 ms
+
+Iteration   5: 636.873 ms/op
+                 gc.alloc.rate:      300.786 MB/sec
+                 gc.alloc.rate.norm: 254118848.000 B/op
+                 gc.count:           4.000 counts
+                 gc.time:            16.000 ms
+
+Iteration   6: 588.128 ms/op
+                 gc.alloc.rate:      396.342 MB/sec
+                 gc.alloc.rate.norm: 254119064.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   7: 671.470 ms/op
+                 gc.alloc.rate:      346.352 MB/sec
+                 gc.alloc.rate.norm: 254118936.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   8: 692.467 ms/op
+                 gc.alloc.rate:      338.019 MB/sec
+                 gc.alloc.rate.norm: 254119152.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   9: 620.583 ms/op
+                 gc.alloc.rate:      377.490 MB/sec
+                 gc.alloc.rate.norm: 254118552.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            23.000 ms
+
+Iteration  10: 552.681 ms/op
+                 gc.alloc.rate:      422.575 MB/sec
+                 gc.alloc.rate.norm: 254123752.000 B/op
+                 gc.count:           ≈ 0 counts
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus":
+  N = 10
+  mean =    788.166 ±(99.9%) 445.335 ms/op
+
+  Histogram, ms/op:
+    [ 500.000,  600.000) = 2 
+    [ 600.000,  700.000) = 4 
+    [ 700.000,  800.000) = 2 
+    [ 800.000,  900.000) = 0 
+    [ 900.000, 1000.000) = 0 
+    [1000.000, 1100.000) = 0 
+    [1100.000, 1200.000) = 1 
+    [1200.000, 1300.000) = 0 
+    [1300.000, 1400.000) = 0 
+
+  Percentiles, ms/op:
+      p(0.0000) =    552.681 ms/op
+     p(50.0000) =    681.969 ms/op
+     p(90.0000) =   1426.331 ms/op
+     p(95.0000) =   1452.044 ms/op
+     p(99.0000) =   1452.044 ms/op
+     p(99.9000) =   1452.044 ms/op
+     p(99.9900) =   1452.044 ms/op
+     p(99.9990) =   1452.044 ms/op
+     p(99.9999) =   1452.044 ms/op
+    p(100.0000) =   1452.044 ms/op
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus:gc.alloc.rate":
+  313.229 ±(99.9%) 138.097 MB/sec [Average]
+  (min, avg, max) = (141.724, 313.229, 422.575), stdev = 91.343
+  CI (99.9%): [175.132, 451.326] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus:gc.alloc.rate.norm":
+  254119366.400 ±(99.9%) 2361.255 B/op [Average]
+  (min, avg, max) = (254118528.000, 254119366.400, 254123752.000), stdev = 1561.824
+  CI (99.9%): [254117005.145, 254121727.655] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus:gc.count":
+  8.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.800, 4.000), stdev = 1.229
+  CI (99.9%): [8.000, 8.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.buildCorpus:gc.time":
+  86.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 8.600, 23.000), stdev = 9.571
+  CI (99.9%): [86.000, 86.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, single-shot each
+# Measurement: 10 iterations, single-shot each
+# Timeout: 2 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus
+# Parameters: (threads = 1)
+
+# Run progress: 99.98% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 932.358 ms/op
+# Warmup Iteration   2: 932.157 ms/op
+# Warmup Iteration   3: 879.682 ms/op
+# Warmup Iteration   4: 990.624 ms/op
+# Warmup Iteration   5: 932.122 ms/op
+Iteration   1: 1660.734 ms/op
+                 gc.alloc.rate:      8.641 MB/sec
+                 gc.alloc.rate.norm: 15237280.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   2: 1216.839 ms/op
+                 gc.alloc.rate:      11.746 MB/sec
+                 gc.alloc.rate.norm: 15237032.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   3: 1269.340 ms/op
+                 gc.alloc.rate:      11.247 MB/sec
+                 gc.alloc.rate.norm: 15237024.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+
+Iteration   4: 908.702 ms/op
+                 gc.alloc.rate:      13.480 MB/sec
+                 gc.alloc.rate.norm: 15237112.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   5: 1480.200 ms/op
+                 gc.alloc.rate:      9.687 MB/sec
+                 gc.alloc.rate.norm: 15237456.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   6: 923.467 ms/op
+                 gc.alloc.rate:      15.382 MB/sec
+                 gc.alloc.rate.norm: 15237624.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   7: 1409.214 ms/op
+                 gc.alloc.rate:      10.130 MB/sec
+                 gc.alloc.rate.norm: 15237016.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   8: 1420.220 ms/op
+                 gc.alloc.rate:      9.593 MB/sec
+                 gc.alloc.rate.norm: 15244344.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   9: 1104.715 ms/op
+                 gc.alloc.rate:      12.162 MB/sec
+                 gc.alloc.rate.norm: 15236968.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration  10: 1638.929 ms/op
+                 gc.alloc.rate:      8.750 MB/sec
+                 gc.alloc.rate.norm: 15240176.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            1.000 ms
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus":
+  N = 10
+  mean =   1303.236 ±(99.9%) 404.619 ms/op
+
+  Histogram, ms/op:
+    [ 900.000,  950.000) = 2 
+    [ 950.000, 1000.000) = 0 
+    [1000.000, 1050.000) = 0 
+    [1050.000, 1100.000) = 0 
+    [1100.000, 1150.000) = 1 
+    [1150.000, 1200.000) = 0 
+    [1200.000, 1250.000) = 1 
+    [1250.000, 1300.000) = 1 
+    [1300.000, 1350.000) = 0 
+    [1350.000, 1400.000) = 0 
+    [1400.000, 1450.000) = 2 
+    [1450.000, 1500.000) = 1 
+    [1500.000, 1550.000) = 0 
+    [1550.000, 1600.000) = 0 
+    [1600.000, 1650.000) = 1 
+
+  Percentiles, ms/op:
+      p(0.0000) =    908.702 ms/op
+     p(50.0000) =   1339.277 ms/op
+     p(90.0000) =   1658.553 ms/op
+     p(95.0000) =   1660.734 ms/op
+     p(99.0000) =   1660.734 ms/op
+     p(99.9000) =   1660.734 ms/op
+     p(99.9900) =   1660.734 ms/op
+     p(99.9990) =   1660.734 ms/op
+     p(99.9999) =   1660.734 ms/op
+    p(100.0000) =   1660.734 ms/op
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus:gc.alloc.rate":
+  11.082 ±(99.9%) 3.279 MB/sec [Average]
+  (min, avg, max) = (8.641, 11.082, 15.382), stdev = 2.169
+  CI (99.9%): [7.802, 14.361] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus:gc.alloc.rate.norm":
+  15238203.200 ±(99.9%) 3571.866 B/op [Average]
+  (min, avg, max) = (15236968.000, 15238203.200, 15244344.000), stdev = 2362.568
+  CI (99.9%): [15234631.334, 15241775.066] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus:gc.count":
+  2.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.200, 1.000), stdev = 0.422
+  CI (99.9%): [2.000, 2.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus:gc.time":
+  3.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 0.300, 2.000), stdev = 0.675
+  CI (99.9%): [3.000, 3.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, single-shot each
+# Measurement: 10 iterations, single-shot each
+# Timeout: 2 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus
+# Parameters: (threads = 2)
+
+# Run progress: 99.98% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 608.488 ms/op
+# Warmup Iteration   2: 481.492 ms/op
+# Warmup Iteration   3: 650.193 ms/op
+# Warmup Iteration   4: 597.894 ms/op
+# Warmup Iteration   5: 572.106 ms/op
+Iteration   1: 561.762 ms/op
+                 gc.alloc.rate:      22.176 MB/sec
+                 gc.alloc.rate.norm: 15237096.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   2: 538.677 ms/op
+                 gc.alloc.rate:      25.972 MB/sec
+                 gc.alloc.rate.norm: 15236824.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   3: 546.078 ms/op
+                 gc.alloc.rate:      25.512 MB/sec
+                 gc.alloc.rate.norm: 15237720.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            2.000 ms
+
+Iteration   4: 624.388 ms/op
+                 gc.alloc.rate:      20.196 MB/sec
+                 gc.alloc.rate.norm: 15237096.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   5: 582.892 ms/op
+                 gc.alloc.rate:      24.030 MB/sec
+                 gc.alloc.rate.norm: 15236992.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   6: 565.396 ms/op
+                 gc.alloc.rate:      24.695 MB/sec
+                 gc.alloc.rate.norm: 15237392.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   7: 629.298 ms/op
+                 gc.alloc.rate:      22.360 MB/sec
+                 gc.alloc.rate.norm: 15237000.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   8: 548.911 ms/op
+                 gc.alloc.rate:      25.489 MB/sec
+                 gc.alloc.rate.norm: 15244032.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   9: 719.457 ms/op
+                 gc.alloc.rate:      16.484 MB/sec
+                 gc.alloc.rate.norm: 15236784.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration  10: 589.250 ms/op
+                 gc.alloc.rate:      23.729 MB/sec
+                 gc.alloc.rate.norm: 15241256.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            1.000 ms
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus":
+  N = 10
+  mean =    590.611 ±(99.9%) 83.095 ms/op
+
+  Histogram, ms/op:
+    [500.000, 525.000) = 0 
+    [525.000, 550.000) = 3 
+    [550.000, 575.000) = 2 
+    [575.000, 600.000) = 2 
+    [600.000, 625.000) = 1 
+    [625.000, 650.000) = 1 
+    [650.000, 675.000) = 0 
+    [675.000, 700.000) = 0 
+    [700.000, 725.000) = 1 
+    [725.000, 750.000) = 0 
+    [750.000, 775.000) = 0 
+
+  Percentiles, ms/op:
+      p(0.0000) =    538.677 ms/op
+     p(50.0000) =    574.144 ms/op
+     p(90.0000) =    710.441 ms/op
+     p(95.0000) =    719.457 ms/op
+     p(99.0000) =    719.457 ms/op
+     p(99.9000) =    719.457 ms/op
+     p(99.9900) =    719.457 ms/op
+     p(99.9990) =    719.457 ms/op
+     p(99.9999) =    719.457 ms/op
+    p(100.0000) =    719.457 ms/op
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus:gc.alloc.rate":
+  23.064 ±(99.9%) 4.427 MB/sec [Average]
+  (min, avg, max) = (16.484, 23.064, 25.972), stdev = 2.928
+  CI (99.9%): [18.637, 27.491] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus:gc.alloc.rate.norm":
+  15238219.200 ±(99.9%) 3684.932 B/op [Average]
+  (min, avg, max) = (15236784.000, 15238219.200, 15244032.000), stdev = 2437.354
+  CI (99.9%): [15234534.268, 15241904.132] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus:gc.count":
+  2.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.200, 1.000), stdev = 0.422
+  CI (99.9%): [2.000, 2.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus:gc.time":
+  3.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 0.300, 2.000), stdev = 0.675
+  CI (99.9%): [3.000, 3.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, single-shot each
+# Measurement: 10 iterations, single-shot each
+# Timeout: 2 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus
+# Parameters: (threads = 4)
+
+# Run progress: 99.98% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 704.382 ms/op
+# Warmup Iteration   2: 637.362 ms/op
+# Warmup Iteration   3: 549.124 ms/op
+# Warmup Iteration   4: 555.211 ms/op
+# Warmup Iteration   5: 741.495 ms/op
+Iteration   1: 697.072 ms/op
+                 gc.alloc.rate:      17.613 MB/sec
+                 gc.alloc.rate.norm: 15237256.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   2: 623.692 ms/op
+                 gc.alloc.rate:      18.169 MB/sec
+                 gc.alloc.rate.norm: 15236936.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   3: 542.215 ms/op
+                 gc.alloc.rate:      22.945 MB/sec
+                 gc.alloc.rate.norm: 15236712.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            3.000 ms
+
+Iteration   4: 522.774 ms/op
+                 gc.alloc.rate:      26.712 MB/sec
+                 gc.alloc.rate.norm: 15237088.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   5: 795.257 ms/op
+                 gc.alloc.rate:      17.785 MB/sec
+                 gc.alloc.rate.norm: 15237096.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   6: 557.867 ms/op
+                 gc.alloc.rate:      22.357 MB/sec
+                 gc.alloc.rate.norm: 15237144.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   7: 563.738 ms/op
+                 gc.alloc.rate:      22.208 MB/sec
+                 gc.alloc.rate.norm: 15236704.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   8: 747.379 ms/op
+                 gc.alloc.rate:      17.252 MB/sec
+                 gc.alloc.rate.norm: 15237760.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   9: 625.097 ms/op
+                 gc.alloc.rate:      22.472 MB/sec
+                 gc.alloc.rate.norm: 15236872.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration  10: 621.119 ms/op
+                 gc.alloc.rate:      22.578 MB/sec
+                 gc.alloc.rate.norm: 15246448.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            ≈ 0 ms
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus":
+  N = 10
+  mean =    629.621 ±(99.9%) 137.575 ms/op
+
+  Histogram, ms/op:
+    [500.000, 525.000) = 1 
+    [525.000, 550.000) = 1 
+    [550.000, 575.000) = 2 
+    [575.000, 600.000) = 0 
+    [600.000, 625.000) = 2 
+    [625.000, 650.000) = 1 
+    [650.000, 675.000) = 0 
+    [675.000, 700.000) = 1 
+    [700.000, 725.000) = 0 
+    [725.000, 750.000) = 1 
+    [750.000, 775.000) = 0 
+
+  Percentiles, ms/op:
+      p(0.0000) =    522.774 ms/op
+     p(50.0000) =    622.406 ms/op
+     p(90.0000) =    790.469 ms/op
+     p(95.0000) =    795.257 ms/op
+     p(99.0000) =    795.257 ms/op
+     p(99.9000) =    795.257 ms/op
+     p(99.9900) =    795.257 ms/op
+     p(99.9990) =    795.257 ms/op
+     p(99.9999) =    795.257 ms/op
+    p(100.0000) =    795.257 ms/op
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus:gc.alloc.rate":
+  21.009 ±(99.9%) 4.734 MB/sec [Average]
+  (min, avg, max) = (17.252, 21.009, 26.712), stdev = 3.131
+  CI (99.9%): [16.275, 25.743] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus:gc.alloc.rate.norm":
+  15238001.600 ±(99.9%) 4510.432 B/op [Average]
+  (min, avg, max) = (15236704.000, 15238001.600, 15246448.000), stdev = 2983.372
+  CI (99.9%): [15233491.168, 15242512.032] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus:gc.count":
+  2.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.200, 1.000), stdev = 0.422
+  CI (99.9%): [2.000, 2.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.persistCorpus:gc.time":
+  3.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 0.300, 3.000), stdev = 0.949
+  CI (99.9%): [3.000, 3.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, single-shot each
+# Measurement: 10 iterations, single-shot each
+# Timeout: 2 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.rebuild
+
+# Run progress: 99.99% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 1822.717 ms/op
+# Warmup Iteration   2: 1696.546 ms/op
+# Warmup Iteration   3: 1724.777 ms/op
+# Warmup Iteration   4: 1668.536 ms/op
+# Warmup Iteration   5: 1720.933 ms/op
+Iteration   1: 1652.585 ms/op
+                 gc.alloc.rate:      146.636 MB/sec
+                 gc.alloc.rate.norm: 254121680.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            15.000 ms
+
+Iteration   2: 1665.730 ms/op
+                 gc.alloc.rate:      145.478 MB/sec
+                 gc.alloc.rate.norm: 254121352.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   3: 1609.781 ms/op
+                 gc.alloc.rate:      150.534 MB/sec
+                 gc.alloc.rate.norm: 254121368.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   4: 1706.103 ms/op
+                 gc.alloc.rate:      142.030 MB/sec
+                 gc.alloc.rate.norm: 254121760.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            47.000 ms
+
+Iteration   5: 1590.407 ms/op
+                 gc.alloc.rate:      152.368 MB/sec
+                 gc.alloc.rate.norm: 254121376.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   6: 1619.179 ms/op
+                 gc.alloc.rate:      149.655 MB/sec
+                 gc.alloc.rate.norm: 254121776.000 B/op
+                 gc.count:           4.000 counts
+                 gc.time:            33.000 ms
+
+Iteration   7: 1833.730 ms/op
+                 gc.alloc.rate:      132.150 MB/sec
+                 gc.alloc.rate.norm: 254121864.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   8: 1703.006 ms/op
+                 gc.alloc.rate:      142.294 MB/sec
+                 gc.alloc.rate.norm: 254121264.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   9: 1696.420 ms/op
+                 gc.alloc.rate:      142.848 MB/sec
+                 gc.alloc.rate.norm: 254121320.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            16.000 ms
+
+Iteration  10: 1717.192 ms/op
+                 gc.alloc.rate:      140.826 MB/sec
+                 gc.alloc.rate.norm: 254184800.000 B/op
+                 gc.count:           ≈ 0 counts
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.rebuild":
+  N = 10
+  mean =   1679.413 ±(99.9%) 105.836 ms/op
+
+  Histogram, ms/op:
+    [1500.000, 1525.000) = 0 
+    [1525.000, 1550.000) = 0 
+    [1550.000, 1575.000) = 0 
+    [1575.000, 1600.000) = 1 
+    [1600.000, 1625.000) = 2 
+    [1625.000, 1650.000) = 0 
+    [1650.000, 1675.000) = 2 
+    [1675.000, 1700.000) = 1 
+    [1700.000, 1725.000) = 3 
+    [1725.000, 1750.000) = 0 
+    [1750.000, 1775.000) = 0 
+    [1775.000, 1800.000) = 0 
+    [1800.000, 1825.000) = 0 
+    [1825.000, 1850.000) = 1 
+    [1850.000, 1875.000) = 0 
+
+  Percentiles, ms/op:
+      p(0.0000) =   1590.407 ms/op
+     p(50.0000) =   1681.075 ms/op
+     p(90.0000) =   1822.076 ms/op
+     p(95.0000) =   1833.730 ms/op
+     p(99.0000) =   1833.730 ms/op
+     p(99.9000) =   1833.730 ms/op
+     p(99.9900) =   1833.730 ms/op
+     p(99.9990) =   1833.730 ms/op
+     p(99.9999) =   1833.730 ms/op
+    p(100.0000) =   1833.730 ms/op
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.rebuild:gc.alloc.rate":
+  144.482 ±(99.9%) 8.875 MB/sec [Average]
+  (min, avg, max) = (132.150, 144.482, 152.368), stdev = 5.870
+  CI (99.9%): [135.607, 153.357] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.rebuild:gc.alloc.rate.norm":
+  254127856.000 ±(99.9%) 30251.229 B/op [Average]
+  (min, avg, max) = (254121264.000, 254127856.000, 254184800.000), stdev = 20009.315
+  CI (99.9%): [254097604.771, 254158107.229] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.rebuild:gc.count":
+  7.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.700, 4.000), stdev = 1.252
+  CI (99.9%): [7.000, 7.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.rebuild:gc.time":
+  111.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 11.100, 47.000), stdev = 16.822
+  CI (99.9%): [111.000, 111.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, single-shot each
+# Measurement: 10 iterations, single-shot each
+# Timeout: 2 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch
+# Parameters: (threads = 1)
+
+# Run progress: 99.99% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 1687.303 ms/op
+# Warmup Iteration   2: 1754.868 ms/op
+# Warmup Iteration   3: 1556.571 ms/op
+# Warmup Iteration   4: 1839.955 ms/op
+# Warmup Iteration   5: 1623.536 ms/op
+Iteration   1: 1754.306 ms/op
+                 gc.alloc.rate:      138.117 MB/sec
+                 gc.alloc.rate.norm: 254095576.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            12.000 ms
+
+Iteration   2: 1534.219 ms/op
+                 gc.alloc.rate:      157.930 MB/sec
+                 gc.alloc.rate.norm: 254095520.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            12.000 ms
+
+Iteration   3: 1572.181 ms/op
+                 gc.alloc.rate:      154.115 MB/sec
+                 gc.alloc.rate.norm: 254095480.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   4: 1610.418 ms/op
+                 gc.alloc.rate:      150.461 MB/sec
+                 gc.alloc.rate.norm: 254095872.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            14.000 ms
+
+Iteration   5: 1692.085 ms/op
+                 gc.alloc.rate:      143.199 MB/sec
+                 gc.alloc.rate.norm: 254095432.000 B/op
+                 gc.count:           4.000 counts
+                 gc.time:            19.000 ms
+
+Iteration   6: 1799.832 ms/op
+                 gc.alloc.rate:      134.627 MB/sec
+                 gc.alloc.rate.norm: 254095512.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   7: 1779.868 ms/op
+                 gc.alloc.rate:      136.132 MB/sec
+                 gc.alloc.rate.norm: 254095904.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   8: 1552.064 ms/op
+                 gc.alloc.rate:      156.116 MB/sec
+                 gc.alloc.rate.norm: 254095872.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            17.000 ms
+
+Iteration   9: 1664.197 ms/op
+                 gc.alloc.rate:      145.600 MB/sec
+                 gc.alloc.rate.norm: 254095376.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration  10: 1581.311 ms/op
+                 gc.alloc.rate:      152.912 MB/sec
+                 gc.alloc.rate.norm: 254160384.000 B/op
+                 gc.count:           ≈ 0 counts
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch":
+  N = 10
+  mean =   1654.048 ±(99.9%) 148.936 ms/op
+
+  Histogram, ms/op:
+    [1500.000, 1525.000) = 0 
+    [1525.000, 1550.000) = 1 
+    [1550.000, 1575.000) = 2 
+    [1575.000, 1600.000) = 1 
+    [1600.000, 1625.000) = 1 
+    [1625.000, 1650.000) = 0 
+    [1650.000, 1675.000) = 1 
+    [1675.000, 1700.000) = 1 
+    [1700.000, 1725.000) = 0 
+    [1725.000, 1750.000) = 0 
+    [1750.000, 1775.000) = 1 
+
+  Percentiles, ms/op:
+      p(0.0000) =   1534.219 ms/op
+     p(50.0000) =   1637.307 ms/op
+     p(90.0000) =   1797.836 ms/op
+     p(95.0000) =   1799.832 ms/op
+     p(99.0000) =   1799.832 ms/op
+     p(99.9000) =   1799.832 ms/op
+     p(99.9900) =   1799.832 ms/op
+     p(99.9990) =   1799.832 ms/op
+     p(99.9999) =   1799.832 ms/op
+    p(100.0000) =   1799.832 ms/op
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch:gc.alloc.rate":
+  146.921 ±(99.9%) 13.011 MB/sec [Average]
+  (min, avg, max) = (134.627, 146.921, 157.930), stdev = 8.606
+  CI (99.9%): [133.910, 159.932] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch:gc.alloc.rate.norm":
+  254102092.800 ±(99.9%) 30966.432 B/op [Average]
+  (min, avg, max) = (254095376.000, 254102092.800, 254160384.000), stdev = 20482.377
+  CI (99.9%): [254071126.368, 254133059.232] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch:gc.count":
+  8.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.800, 4.000), stdev = 1.229
+  CI (99.9%): [8.000, 8.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch:gc.time":
+  74.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 7.400, 19.000), stdev = 8.072
+  CI (99.9%): [74.000, 74.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, single-shot each
+# Measurement: 10 iterations, single-shot each
+# Timeout: 2 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch
+# Parameters: (threads = 2)
+
+# Run progress: 99.99% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 1227.413 ms/op
+# Warmup Iteration   2: 1224.109 ms/op
+# Warmup Iteration   3: 1370.448 ms/op
+# Warmup Iteration   4: 1308.557 ms/op
+# Warmup Iteration   5: 1540.330 ms/op
+Iteration   1: 1287.685 ms/op
+                 gc.alloc.rate:      188.163 MB/sec
+                 gc.alloc.rate.norm: 254095056.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   2: 1377.486 ms/op
+                 gc.alloc.rate:      175.898 MB/sec
+                 gc.alloc.rate.norm: 254095504.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            14.000 ms
+
+Iteration   3: 1501.799 ms/op
+                 gc.alloc.rate:      161.343 MB/sec
+                 gc.alloc.rate.norm: 254095464.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   4: 1451.135 ms/op
+                 gc.alloc.rate:      166.960 MB/sec
+                 gc.alloc.rate.norm: 254095880.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            34.000 ms
+
+Iteration   5: 1411.459 ms/op
+                 gc.alloc.rate:      171.664 MB/sec
+                 gc.alloc.rate.norm: 254096008.000 B/op
+                 gc.count:           3.000 counts
+                 gc.time:            32.000 ms
+
+Iteration   6: 1314.358 ms/op
+                 gc.alloc.rate:      184.346 MB/sec
+                 gc.alloc.rate.norm: 254096160.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   7: 1328.981 ms/op
+                 gc.alloc.rate:      182.315 MB/sec
+                 gc.alloc.rate.norm: 254095944.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            14.000 ms
+
+Iteration   8: 1223.577 ms/op
+                 gc.alloc.rate:      198.023 MB/sec
+                 gc.alloc.rate.norm: 254095456.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   9: 1199.740 ms/op
+                 gc.alloc.rate:      201.961 MB/sec
+                 gc.alloc.rate.norm: 254095408.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration  10: 1231.555 ms/op
+                 gc.alloc.rate:      196.170 MB/sec
+                 gc.alloc.rate.norm: 254161336.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            24.000 ms
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch":
+  N = 10
+  mean =   1332.777 ±(99.9%) 153.704 ms/op
+
+  Histogram, ms/op:
+    [1100.000, 1150.000) = 0 
+    [1150.000, 1200.000) = 1 
+    [1200.000, 1250.000) = 2 
+    [1250.000, 1300.000) = 1 
+    [1300.000, 1350.000) = 2 
+    [1350.000, 1400.000) = 1 
+    [1400.000, 1450.000) = 1 
+    [1450.000, 1500.000) = 1 
+    [1500.000, 1550.000) = 1 
+
+  Percentiles, ms/op:
+      p(0.0000) =   1199.740 ms/op
+     p(50.0000) =   1321.669 ms/op
+     p(90.0000) =   1496.732 ms/op
+     p(95.0000) =   1501.799 ms/op
+     p(99.0000) =   1501.799 ms/op
+     p(99.9000) =   1501.799 ms/op
+     p(99.9900) =   1501.799 ms/op
+     p(99.9990) =   1501.799 ms/op
+     p(99.9999) =   1501.799 ms/op
+    p(100.0000) =   1501.799 ms/op
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch:gc.alloc.rate":
+  182.684 ±(99.9%) 20.728 MB/sec [Average]
+  (min, avg, max) = (161.343, 182.684, 201.961), stdev = 13.711
+  CI (99.9%): [161.956, 203.413] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch:gc.alloc.rate.norm":
+  254102221.600 ±(99.9%) 31406.483 B/op [Average]
+  (min, avg, max) = (254095056.000, 254102221.600, 254161336.000), stdev = 20773.444
+  CI (99.9%): [254070815.117, 254133628.083] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch:gc.count":
+  7.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.700, 3.000), stdev = 0.949
+  CI (99.9%): [7.000, 7.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch:gc.time":
+  118.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 11.800, 34.000), stdev = 13.967
+  CI (99.9%): [118.000, 118.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 21.0.12.1, OpenJDK 64-Bit Server VM, 21.0.12.1+1-LTS
+# VM invoker: C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe
+# VM options: -Xms2G -Xmx2G -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 5 iterations, single-shot each
+# Measurement: 10 iterations, single-shot each
+# Timeout: 2 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch
+# Parameters: (threads = 4)
+
+# Run progress: 100.00% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 1266.943 ms/op
+# Warmup Iteration   2: 1353.787 ms/op
+# Warmup Iteration   3: 1259.881 ms/op
+# Warmup Iteration   4: 1424.151 ms/op
+# Warmup Iteration   5: 1302.134 ms/op
+Iteration   1: 1329.600 ms/op
+                 gc.alloc.rate:      182.230 MB/sec
+                 gc.alloc.rate.norm: 254095424.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            26.000 ms
+
+Iteration   2: 1233.001 ms/op
+                 gc.alloc.rate:      196.510 MB/sec
+                 gc.alloc.rate.norm: 254095248.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   3: 1200.086 ms/op
+                 gc.alloc.rate:      201.897 MB/sec
+                 gc.alloc.rate.norm: 254095336.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            14.000 ms
+
+Iteration   4: 1153.926 ms/op
+                 gc.alloc.rate:      209.976 MB/sec
+                 gc.alloc.rate.norm: 254095560.000 B/op
+                 gc.count:           2.000 counts
+                 gc.time:            19.000 ms
+
+Iteration   5: 1122.230 ms/op
+                 gc.alloc.rate:      215.906 MB/sec
+                 gc.alloc.rate.norm: 254095168.000 B/op
+                 gc.count:           3.000 counts
+                 gc.time:            5.000 ms
+
+Iteration   6: 1260.817 ms/op
+                 gc.alloc.rate:      192.174 MB/sec
+                 gc.alloc.rate.norm: 254095616.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   7: 1164.767 ms/op
+                 gc.alloc.rate:      208.021 MB/sec
+                 gc.alloc.rate.norm: 254095648.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            14.000 ms
+
+Iteration   8: 1171.762 ms/op
+                 gc.alloc.rate:      206.777 MB/sec
+                 gc.alloc.rate.norm: 254095360.000 B/op
+                 gc.count:           ≈ 0 counts
+
+Iteration   9: 1196.789 ms/op
+                 gc.alloc.rate:      202.457 MB/sec
+                 gc.alloc.rate.norm: 254095168.000 B/op
+                 gc.count:           1.000 counts
+                 gc.time:            21.000 ms
+
+Iteration  10: 1159.994 ms/op
+                 gc.alloc.rate:      208.265 MB/sec
+                 gc.alloc.rate.norm: 254162448.000 B/op
+                 gc.count:           ≈ 0 counts
+
+
+
+Result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch":
+  N = 10
+  mean =   1199.297 ±(99.9%) 92.100 ms/op
+
+  Histogram, ms/op:
+    [1100.000, 1125.000) = 1 
+    [1125.000, 1150.000) = 0 
+    [1150.000, 1175.000) = 4 
+    [1175.000, 1200.000) = 1 
+    [1200.000, 1225.000) = 1 
+    [1225.000, 1250.000) = 1 
+    [1250.000, 1275.000) = 1 
+    [1275.000, 1300.000) = 0 
+    [1300.000, 1325.000) = 0 
+    [1325.000, 1350.000) = 1 
+    [1350.000, 1375.000) = 0 
+
+  Percentiles, ms/op:
+      p(0.0000) =   1122.230 ms/op
+     p(50.0000) =   1184.275 ms/op
+     p(90.0000) =   1322.722 ms/op
+     p(95.0000) =   1329.600 ms/op
+     p(99.0000) =   1329.600 ms/op
+     p(99.9000) =   1329.600 ms/op
+     p(99.9900) =   1329.600 ms/op
+     p(99.9990) =   1329.600 ms/op
+     p(99.9999) =   1329.600 ms/op
+    p(100.0000) =   1329.600 ms/op
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch:gc.alloc.rate":
+  202.421 ±(99.9%) 14.876 MB/sec [Average]
+  (min, avg, max) = (182.230, 202.421, 215.906), stdev = 9.839
+  CI (99.9%): [187.546, 217.297] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch:gc.alloc.rate.norm":
+  254102097.600 ±(99.9%) 32059.958 B/op [Average]
+  (min, avg, max) = (254095168.000, 254102097.600, 254162448.000), stdev = 21205.677
+  CI (99.9%): [254070037.642, 254134157.558] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch:gc.count":
+  9.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (≈ 0, 0.900, 3.000), stdev = 0.994
+  CI (99.9%): [9.000, 9.000] (assumes normal distribution)
+
+Secondary result "com.thescratchers.searchengine.indexing.benchmark.CorpusIndexingBenchmark.updateBatch:gc.time":
+  99.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (≈ 0, 9.900, 26.000), stdev = 10.082
+  CI (99.9%): [99.000, 99.000] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:11:19
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+NOTE: Current JVM experimentally supports Compiler Blackholes, and they are in use. Please exercise
+extra caution when trusting the results, look into the generated code to check the benchmark still
+works, and factor in a small probability of new VM bugs. Additionally, while comparisons between
+different JVMs are already problematic, the performance difference caused by different Blackhole
+modes can be very significant. Please make sure you use the consistent Blackhole mode for comparisons.
+
+Benchmark                                                 (threads)  Mode  Cnt          Score       Error   Units
+IndexingBenchmark.indexBook                                     N/A  avgt   10         27.347 ±     1.037   ms/op
+IndexingBenchmark.indexBook:gc.alloc.rate                       N/A  avgt   10         24.050 ±     0.873  MB/sec
+IndexingBenchmark.indexBook:gc.alloc.rate.norm                  N/A  avgt   10     690684.261 ±   259.959    B/op
+IndexingBenchmark.indexBook:gc.count                            N/A  avgt   10          2.000              counts
+IndexingBenchmark.indexBook:gc.time                             N/A  avgt   10          3.000                  ms
+IndexingBenchmark.parseHeader                                   N/A  avgt   10          0.006 ±     0.001   ms/op
+IndexingBenchmark.parseHeader:gc.alloc.rate                     N/A  avgt   10        567.706 ±     2.048  MB/sec
+IndexingBenchmark.parseHeader:gc.alloc.rate.norm                N/A  avgt   10       3728.004 ±     0.001    B/op
+IndexingBenchmark.parseHeader:gc.count                          N/A  avgt   10         47.000              counts
+IndexingBenchmark.parseHeader:gc.time                           N/A  avgt   10         54.000                  ms
+IndexingBenchmark.tokenize                                      N/A  avgt   10          8.085 ±     0.060   ms/op
+IndexingBenchmark.tokenize:gc.alloc.rate                        N/A  avgt   10       1139.855 ±     8.531  MB/sec
+IndexingBenchmark.tokenize:gc.alloc.rate.norm                   N/A  avgt   10    9663493.613 ±     0.039    B/op
+IndexingBenchmark.tokenize:gc.count                             N/A  avgt   10        515.000              counts
+IndexingBenchmark.tokenize:gc.time                              N/A  avgt   10       6862.000                  ms
+CorpusIndexingBenchmark.analyseCorpus                             1    ss   10        224.264 ±    16.336   ms/op
+CorpusIndexingBenchmark.analyseCorpus:gc.alloc.rate               1    ss   10       1017.226 ±    73.587  MB/sec
+CorpusIndexingBenchmark.analyseCorpus:gc.alloc.rate.norm          1    ss   10  238878713.600 ±  1440.973    B/op
+CorpusIndexingBenchmark.analyseCorpus:gc.count                    1    ss   10          7.000              counts
+CorpusIndexingBenchmark.analyseCorpus:gc.time                     1    ss   10         68.000                  ms
+CorpusIndexingBenchmark.analyseCorpus                             2    ss   10        115.388 ±    17.597   ms/op
+CorpusIndexingBenchmark.analyseCorpus:gc.alloc.rate               2    ss   10       1989.404 ±   295.518  MB/sec
+CorpusIndexingBenchmark.analyseCorpus:gc.alloc.rate.norm          2    ss   10  238878704.000 ±  1914.446    B/op
+CorpusIndexingBenchmark.analyseCorpus:gc.count                    2    ss   10          8.000              counts
+CorpusIndexingBenchmark.analyseCorpus:gc.time                     2    ss   10         82.000                  ms
+CorpusIndexingBenchmark.analyseCorpus                             4    ss   10         63.331 ±    10.306   ms/op
+CorpusIndexingBenchmark.analyseCorpus:gc.alloc.rate               4    ss   10       3624.489 ±   567.618  MB/sec
+CorpusIndexingBenchmark.analyseCorpus:gc.alloc.rate.norm          4    ss   10  238878663.200 ±  1729.217    B/op
+CorpusIndexingBenchmark.analyseCorpus:gc.count                    4    ss   10          7.000              counts
+CorpusIndexingBenchmark.analyseCorpus:gc.time                     4    ss   10         64.000                  ms
+CorpusIndexingBenchmark.buildCorpus                               1    ss   10       3020.298 ±   988.148   ms/op
+CorpusIndexingBenchmark.buildCorpus:gc.alloc.rate                 1    ss   10         80.775 ±    28.343  MB/sec
+CorpusIndexingBenchmark.buildCorpus:gc.alloc.rate.norm            1    ss   10  254119465.600 ±  1634.818    B/op
+CorpusIndexingBenchmark.buildCorpus:gc.count                      1    ss   10          9.000              counts
+CorpusIndexingBenchmark.buildCorpus:gc.time                       1    ss   10         95.000                  ms
+CorpusIndexingBenchmark.buildCorpus                               2    ss   10       1127.116 ±   347.762   ms/op
+CorpusIndexingBenchmark.buildCorpus:gc.alloc.rate                 2    ss   10        208.614 ±    67.482  MB/sec
+CorpusIndexingBenchmark.buildCorpus:gc.alloc.rate.norm            2    ss   10  254119505.600 ±  1721.769    B/op
+CorpusIndexingBenchmark.buildCorpus:gc.count                      2    ss   10          9.000              counts
+CorpusIndexingBenchmark.buildCorpus:gc.time                       2    ss   10         94.000                  ms
+CorpusIndexingBenchmark.buildCorpus                               4    ss   10        788.166 ±   445.335   ms/op
+CorpusIndexingBenchmark.buildCorpus:gc.alloc.rate                 4    ss   10        313.229 ±   138.097  MB/sec
+CorpusIndexingBenchmark.buildCorpus:gc.alloc.rate.norm            4    ss   10  254119366.400 ±  2361.255    B/op
+CorpusIndexingBenchmark.buildCorpus:gc.count                      4    ss   10          8.000              counts
+CorpusIndexingBenchmark.buildCorpus:gc.time                       4    ss   10         86.000                  ms
+CorpusIndexingBenchmark.persistCorpus                             1    ss   10       1303.236 ±   404.619   ms/op
+CorpusIndexingBenchmark.persistCorpus:gc.alloc.rate               1    ss   10         11.082 ±     3.279  MB/sec
+CorpusIndexingBenchmark.persistCorpus:gc.alloc.rate.norm          1    ss   10   15238203.200 ±  3571.866    B/op
+CorpusIndexingBenchmark.persistCorpus:gc.count                    1    ss   10          2.000              counts
+CorpusIndexingBenchmark.persistCorpus:gc.time                     1    ss   10          3.000                  ms
+CorpusIndexingBenchmark.persistCorpus                             2    ss   10        590.611 ±    83.095   ms/op
+CorpusIndexingBenchmark.persistCorpus:gc.alloc.rate               2    ss   10         23.064 ±     4.427  MB/sec
+CorpusIndexingBenchmark.persistCorpus:gc.alloc.rate.norm          2    ss   10   15238219.200 ±  3684.932    B/op
+CorpusIndexingBenchmark.persistCorpus:gc.count                    2    ss   10          2.000              counts
+CorpusIndexingBenchmark.persistCorpus:gc.time                     2    ss   10          3.000                  ms
+CorpusIndexingBenchmark.persistCorpus                             4    ss   10        629.621 ±   137.575   ms/op
+CorpusIndexingBenchmark.persistCorpus:gc.alloc.rate               4    ss   10         21.009 ±     4.734  MB/sec
+CorpusIndexingBenchmark.persistCorpus:gc.alloc.rate.norm          4    ss   10   15238001.600 ±  4510.432    B/op
+CorpusIndexingBenchmark.persistCorpus:gc.count                    4    ss   10          2.000              counts
+CorpusIndexingBenchmark.persistCorpus:gc.time                     4    ss   10          3.000                  ms
+CorpusIndexingBenchmark.rebuild                                 N/A    ss   10       1679.413 ±   105.836   ms/op
+CorpusIndexingBenchmark.rebuild:gc.alloc.rate                   N/A    ss   10        144.482 ±     8.875  MB/sec
+CorpusIndexingBenchmark.rebuild:gc.alloc.rate.norm              N/A    ss   10  254127856.000 ± 30251.229    B/op
+CorpusIndexingBenchmark.rebuild:gc.count                        N/A    ss   10          7.000              counts
+CorpusIndexingBenchmark.rebuild:gc.time                         N/A    ss   10        111.000                  ms
+CorpusIndexingBenchmark.updateBatch                               1    ss   10       1654.048 ±   148.936   ms/op
+CorpusIndexingBenchmark.updateBatch:gc.alloc.rate                 1    ss   10        146.921 ±    13.011  MB/sec
+CorpusIndexingBenchmark.updateBatch:gc.alloc.rate.norm            1    ss   10  254102092.800 ± 30966.432    B/op
+CorpusIndexingBenchmark.updateBatch:gc.count                      1    ss   10          8.000              counts
+CorpusIndexingBenchmark.updateBatch:gc.time                       1    ss   10         74.000                  ms
+CorpusIndexingBenchmark.updateBatch                               2    ss   10       1332.777 ±   153.704   ms/op
+CorpusIndexingBenchmark.updateBatch:gc.alloc.rate                 2    ss   10        182.684 ±    20.728  MB/sec
+CorpusIndexingBenchmark.updateBatch:gc.alloc.rate.norm            2    ss   10  254102221.600 ± 31406.483    B/op
+CorpusIndexingBenchmark.updateBatch:gc.count                      2    ss   10          7.000              counts
+CorpusIndexingBenchmark.updateBatch:gc.time                       2    ss   10        118.000                  ms
+CorpusIndexingBenchmark.updateBatch                               4    ss   10       1199.297 ±    92.100   ms/op
+CorpusIndexingBenchmark.updateBatch:gc.alloc.rate                 4    ss   10        202.421 ±    14.876  MB/sec
+CorpusIndexingBenchmark.updateBatch:gc.alloc.rate.norm            4    ss   10  254102097.600 ± 32059.958    B/op
+CorpusIndexingBenchmark.updateBatch:gc.count                      4    ss   10          9.000              counts
+CorpusIndexingBenchmark.updateBatch:gc.time                       4    ss   10         99.000                  ms
+
+Benchmark result is saved to C:\Users\Pablo\Desktop\BIG DATA\stage_2\benchmarks\results\20261105_indexing-jmh\jmh.csv

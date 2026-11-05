@@ -1,0 +1,12 @@
+java -jar benchmarks/integration/target/integration-bench.jar 
+
+experiment: coordination
+started_utc: 2026-11-05T18:06:58.377031200Z
+commit: 04132ab
+topology: 1 Search, 1 Indexing x 2 workers, 1 Ingestion, 1 broker
+service_jvm: -Xmx1g
+corpus: samples/books.txt (20 books, served by a local Gutenberg stand-in)
+queries: samples/words.txt [time, love, heart, nothing, death, truth, fortune, monster, wonderland, darcy]
+sqlite: journal_mode=WAL, synchronous=NORMAL, busy_timeout=5000 (common.Sqlite)
+broker: ActiveMQ 6.3.2 embedded, persistent KahaDB, 5 redeliveries then ActiveMQ.DLQ
+method: Books are processed one at a time, so each measurement is unloaded. chain.csv: for each corpus book on a fresh, empty system, the time from sending POST /ingest/{id} until its response (download from the local Gutenberg, split, atomic write, ingestion log, publish), until its BookIndexed event arrives, and until GET /books/{id} answers 200 in Search. direct-vs-event.csv: once the corpus is ingested, the same re-indexing of each book done synchronously with POST /index/update/{id} and through the broker (BookDownloaded sent to the queue until its BookIndexed arrives); the difference is the cost of event coordination.
