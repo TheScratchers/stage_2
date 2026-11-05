@@ -1,8 +1,8 @@
 # 5.x Indexing Service
 
 <!--
-  Every figure of this file must come from the official run in benchmarks/results/ on the
-  reference machine. Cells marked FILL are completed from the file named in the caption.
+  Every figure of this file comes from the official run in benchmarks/results/20261105_* on the
+  reference machine; each table names its source file.
 -->
 
 The Indexing Service turns the books of the datalake into the inverted index that Search reads. It
@@ -87,15 +87,17 @@ index `idx_postings_book` serves the per-book `DELETE` of re-indexing.
   `busy_timeout` for the lock. Worker threads and replicas therefore index in parallel but commit
   one after another. Section 7.y measures what this costs.
 
-*Table 5.x.1. Size of the index for the 20-book corpus. Source:
-`benchmarks/results/<day>_indexing-jmh/footprint.csv` (1 thread).*
+*Table 5.x.1. Size of the index for the 20-book corpus (1 MB = 10^6 bytes). Source:
+`benchmarks/results/20261105_indexing-jmh/footprint.csv` (1 thread).*
 
 | Measure | Value |
 |---|---:|
-| Corpus (header and body files) | FILL MB |
-| `books` rows | FILL |
-| `postings` rows | FILL |
-| `datamart.db` after a WAL checkpoint (tables and indexes) | FILL MB |
+| Corpus (header and body files) | 11.29 MB |
+| `books` rows | 20 |
+| `postings` rows | 139,869 |
+| `datamart.db` after a WAL checkpoint (tables and indexes) | 7.19 MB |
+
+The whole index takes 64 % of the size of the text it indexes.
 
 ## Coordination: consuming `BookDownloaded`
 
@@ -248,62 +250,96 @@ The whole run is one command, described in `indexing-service/README.md`. It writ
 
 ## Results
 
-*Table 7.y.1. Steps of indexing one book (book 1342), mean ± 99.9 % error. Source:
-`benchmarks/results/<day>_indexing-jmh/jmh.csv`.*
+All the figures come from `benchmarks/results/20261105_indexing-jmh/`, measured on the reference
+machine (13th Gen Intel Core i7-13700KF, 24 logical processors, 31.9 GB of memory, Windows 11,
+Temurin 21.0.12) at commit `04132ab`, the same commit and machine as section 7.x. 1 MB = 10^6 bytes.
+
+*Table 7.y.1. Steps of indexing one book (book 1342), mean ± 99.9 % error over 10 iterations.
+Source: `.../jmh.csv`.*
 
 | Step | Time (ms/op) | Allocated (MB/op) |
 |---|---:|---:|
-| `parseHeader` | FILL | FILL |
-| `tokenize` | FILL | FILL |
-| `indexBook` (one SQLite transaction) | FILL | FILL |
+| `parseHeader` | 0.0063 ± 0.0000 | 0.004 |
+| `tokenize` | 8.09 ± 0.06 | 9.66 |
+| `indexBook` (one SQLite transaction) | 27.35 ± 1.04 | 0.69 |
 
 *Table 7.y.2. Time to process the 20-book corpus with 1, 2 and 4 threads, mean ± 99.9 % error
 over 10 passes. Speed-up is relative to 1 thread. Source: `.../jmh.csv`.*
 
 | Benchmark | 1 thread (ms) | 2 threads (ms) | 4 threads (ms) | Speed-up 2 / 4 |
 |---|---:|---:|---:|---:|
-| `analyseCorpus` (construction) | FILL | FILL | FILL | FILL / FILL |
-| `persistCorpus` (persistence) | FILL | FILL | FILL | FILL / FILL |
-| `buildCorpus` (both) | FILL | FILL | FILL | FILL / FILL |
-| `updateBatch` (incremental update) | FILL | FILL | FILL | FILL / FILL |
+| `analyseCorpus` (construction) | 224 ± 16 | 115 ± 18 | 63 ± 10 | 1.94 / 3.54 |
+| `persistCorpus` (persistence) | 1303 ± 405 | 591 ± 83 | 630 ± 138 | 2.21 / 2.07 |
+| `buildCorpus` (both) | 3020 ± 988 | 1127 ± 348 | 788 ± 445 | 2.68 / 3.83 |
+| `updateBatch` (incremental update) | 1654 ± 149 | 1333 ± 154 | 1199 ± 92 | 1.24 / 1.38 |
 
 *Table 7.y.3. Complete rebuild against building from scratch and updating the same batch
 (1 thread). Source: `.../jmh.csv`.*
 
 | Operation | Time (ms) | Books/s |
 |---|---:|---:|
-| `buildCorpus`, empty datamart | FILL | FILL |
-| `updateBatch`, full datamart | FILL | FILL |
-| `rebuild` (`POST /index/rebuild`) | FILL | FILL |
+| `buildCorpus`, empty datamart | 3020 ± 988 | 6.6 |
+| `updateBatch`, full datamart | 1654 ± 149 | 12.1 |
+| `rebuild` (`POST /index/rebuild`) | 1679 ± 106 | 11.9 |
 
 *Table 7.y.4. Memory of indexing the corpus. Source: `.../footprint.csv` and `.../jmh.csv`.*
 
 | Measure | 1 thread | 2 threads | 4 threads |
 |---|---:|---:|---:|
-| Peak Java heap while indexing (MB) | FILL | FILL | FILL |
-| Java heap after indexing, after a GC (MB) | FILL | FILL | FILL |
-| Allocated per corpus pass, `buildCorpus` (MB) | FILL | FILL | FILL |
+| Java heap before indexing, after a GC (MB) | 3.82 | 3.92 | 3.93 |
+| Peak Java heap while indexing (MB) | 208.0 | 210.5 | 210.5 |
+| Java heap after indexing, after a GC (MB) | 3.91 | 3.93 | 3.93 |
+| Allocated per corpus pass, `buildCorpus` (MB) | 254.1 | 254.1 | 254.1 |
 
 The peak heap is the sum of the peaks of the heap pools, so it is an upper bound that depends on
 the garbage collector. The SQLite page cache is native memory and is not included. The resident
 memory of the whole Indexing process is in Table 7.x.4.
 
-## Points to discuss
+## Discussion
 
-<!-- Confirm or reject each point with the official figures before submitting. -->
-
-- **Construction against persistence.** Analysing a book needs only the CPU, so
-  `analyseCorpus` should scale with the threads up to the cores of the host. `persistCorpus`
-  should not scale, because SQLite has a single writer: the threads only queue on the lock.
-  `buildCorpus` lies between the two, since one thread's analysis overlaps another's commit. This is
-  the same limit as the throughput of Table 7.x.2, here without the broker.
-- **Update against build.** An update must delete the previous postings of the book before
-  inserting the new ones, and maintain the indexes for both, so it is expected to cost more than
-  storing the book into an empty datamart.
-- **Rebuild.** The rebuild re-indexes every book sequentially, plus the lookup of the ingestion log
-  and the removal check. It should therefore cost about as much as `updateBatch` with 1 thread.
-- **Memory.** The index lives on disk; the heap only holds the books in progress, so the heap after
-  indexing should return to its level before.
+- **Construction scales, persistence does not.** Analysing the corpus in memory is almost
+  perfectly parallel: 1.94× with 2 threads and 3.54× with 4 (Table 7.y.2). Persisting it stops
+  improving after 2 threads (591 ms with 2 threads, 630 ms with 4, within the error). This is the
+  single SQLite writer: extra threads only queue on the write lock. The incremental update, where
+  storing dominates, gains only 1.24× and 1.38×. The integration benchmarks see the same ceiling
+  through the broker: 12.3 books/s with 1 worker, 18.0 with 2, 18.5 with 4 and 18.4 with two
+  replicas (mean of 3 runs, `20261105_indexing-throughput/raw.csv`). A second replica adds no
+  writer capacity, because both processes write the same file.
+- **The cost of a book is the transaction, not the text.** For book 1342, `indexBook` takes
+  27.3 ms against 8.1 ms for tokenizing and 0.006 ms for the header (Table 7.y.1). Tokenizing
+  allocates 14 times more memory than storing, but it runs in parallel; the transaction does not.
+- **Rebuild and update cost the same.** The complete rebuild takes 1679 ms against 1654 ms for
+  re-indexing the same batch with 1 thread (Table 7.y.3): reading the ingestion log and checking
+  for removed books is negligible next to the re-indexing itself. With 1 thread both handle about
+  12 books per second, as fast as the whole pipeline with 1 worker (12.3 books/s), which mostly
+  re-indexes books as well. Coordinating through the broker therefore adds little to the cost of
+  indexing a book.
+- **Why one thread is penalised.** With 1 thread, `persistCorpus` is more than twice as slow as
+  with 2 (2.21×), which a single writer cannot explain. Each `DatamartStore` call opens and closes
+  its own connection, and when the last connection to a WAL database closes, SQLite checkpoints the
+  whole WAL into the database file and deletes it. With one thread and no other open connection,
+  that happens after every book. With two or more threads the connections overlap, and the costly
+  checkpoint is mostly avoided. A diagnostic run outside the official measurements, holding one
+  extra connection open during the pass, removed most of the penalty, which supports this
+  explanation. With the default of 2 workers the connections of the service usually overlap, so
+  the figures with 2 or more threads are the representative ones; a single worker would pay this
+  checkpoint after every book.
+- **An unexplained outlier.** `buildCorpus` with 1 thread (3020 ± 988 ms, individual passes from
+  2.1 to 3.8 s) is slower than its two parts measured separately (224 ms + 1303 ms), and slower than
+  updating a full datamart. It is the only configuration with that behaviour; with 2 and 4 threads,
+  building is faster than updating (1127 against 1333 ms, and 788 against 1199 ms), as expected
+  because an update must also delete the previous postings. It only affects passes that create a
+  new database file in the system's temporary directory, so we suspect the file system or the
+  antivirus scanning the new files of that machine, but we could not reproduce it elsewhere. We
+  therefore do not draw conclusions from that single figure.
+- **Memory.** The index lives on disk. The heap returns to under 4 MB after indexing, whatever the
+  number of threads (Table 7.y.4). While indexing, the peak stays near 210 MB with 1, 2 or 4
+  threads, and a pass allocates 254 MB, 94 % of it in the analysis (tokenizing and counting). These
+  are short-lived objects, so the garbage collector reclaims them cheaply.
+- **Possible improvement.** Keeping one connection per worker open for its whole life, instead of
+  one per book, would avoid the per-book checkpoint with 1 worker and the cost of opening
+  connections. We did not change it after the functional freeze, because that would invalidate
+  the measurements; it is a candidate for Stage 3.
 
 ## Limits of the evidence
 
