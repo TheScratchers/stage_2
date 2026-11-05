@@ -1,0 +1,5 @@
+store,bytes
+datalake_books,11290405
+ingestion_log,49152
+datamart,7299072
+broker_store,67309760

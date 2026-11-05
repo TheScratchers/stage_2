@@ -1,0 +1,6 @@
+measure,median_ms,p95_ms,max_ms
+ingest_response,19.42,38.61,304.30
+indexed_event,59.66,104.83,356.66
+searchable,64.27,109.17,429.43
+http_update,72.90,117.67,160.17
+event_path,73.94,119.57,172.74

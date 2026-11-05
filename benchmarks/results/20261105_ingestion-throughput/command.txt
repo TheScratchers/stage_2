@@ -1,0 +1,11 @@
+mvn -pl ingestion-service test-compile exec:java -Dexec.mainClass=com.thescratchers.searchengine.ingestion.benchmark.IngestionBenchmark -Dexec.classpathScope=test
+
+experiment: ingestion-throughput
+started_utc: 2026-11-05T17:39:50.310126400Z
+commit: 04132ab
+concurrency_levels: [1, 2, 4]
+repeats: 3
+corpus: samples\books.txt (20 books)
+sqlite: journal_mode=WAL, synchronous=NORMAL, busy_timeout=5000
+broker: ActiveMQ VM embedded broker
+modes: fresh (new datalake) and idempotent (cached)
