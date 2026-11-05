@@ -1,0 +1,12 @@
+java -jar benchmarks/integration/target/integration-bench.jar 
+
+experiment: search-latency-2-replicas
+started_utc: 2026-11-05T17:59:21.089197400Z
+commit: 04132ab
+topology: 2 Search, 1 Indexing x 2 workers, 1 Ingestion, 1 broker
+service_jvm: -Xmx1g
+corpus: samples/books.txt (20 books, served by a local Gutenberg stand-in)
+queries: samples/words.txt [time, love, heart, nothing, death, truth, fortune, monster, wonderland, darcy]
+sqlite: journal_mode=WAL, synchronous=NORMAL, busy_timeout=5000 (common.Sqlite)
+broker: ActiveMQ 6.3.2 embedded, persistent KahaDB, 5 redeliveries then ActiveMQ.DLQ
+method: Closed-loop load on GET /search?q={word} for every word of samples/words.txt, spread round-robin over the Search replicas; one thread and HTTP/1.1 connection per client, no think time; warm-up 10 s and measurement 30 s per level.
