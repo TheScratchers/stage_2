@@ -73,15 +73,44 @@ from the broker. This rule already holds on one host.
 
 ## What the Stage 2 measurements tell us
 
-<!-- Complete with the official figures of section 7 once they are in benchmarks/results/. -->
-
 The integration benchmarks were designed to test three hypotheses about where the single host
-limits the design. Each one is confirmed or rejected with the figures of section 7:
-- **Indexing** is bounded by the single SQLite writer (section 7.x.2). If so, adding threads or
-  processes on the same file cannot raise it, but writing to several partitions on several machines
-  can.
-- **Search** is bounded by the CPU of the host (section 7.x.1). If so, replicas on separate
-  machines add capacity, whereas replicas on one machine only share it.
-- **Coordination through the broker** costs little per book compared with indexing it
-  (section 7.x.3). Whatever its size, that cost buys decoupling and recovery, which matter more on a
-  cluster.
+limits the design. The official figures of section 7 settle them as follows.
+
+- **Indexing is bounded by the single SQLite writer: confirmed.**
+  - Throughput rises from 12.3 to 18.0 books per second with a second thread, then stays at 18.5
+    with 4 threads and 18.4 with two processes (Table 7.x.2).
+  - The extra threads do not use more CPU: about 140 % against 134 % with 2 threads. They wait for
+    the write lock.
+  - The JMH results show the same split without the broker: analysing books scales with threads,
+    persisting them does not (section 7.y).
+  - On the cluster, more writers on the same file cannot raise this limit, but an index partitioned
+    over several machines, each partition with its own writer, can. This is the main reason to
+    distribute the datamart.
+- **Search is bounded by the host, not by one Search process: partly confirmed.**
+  - Throughput peaks at about 5,500 requests per second with 16 clients, and a second replica does
+    not raise that peak (Table 7.x.1).
+  - The Search processes then used about 9 of the 24 logical processors, and two replicas only split
+    that work between them.
+  - The limit is therefore shared by the whole machine, where the load generator also runs. It
+    could not be attributed to one component with the evidence of a single host.
+  - On the cluster, clients and replicas on different machines will show whether Search replicas
+    scale out, which is what the stateless design of the service is meant for.
+- **Coordination through the broker costs little: confirmed.**
+  - Re-indexing a book through the broker took a median of 3.8 ms more than doing it directly, about
+    5 % of the cost of indexing the book (Table 7.x.3).
+  - A new book is searchable about 64 ms after it is requested.
+  - The broker is therefore not the bottleneck of the pipeline, and its cost buys what a cluster
+    needs most: decoupled services, redelivery after a crash and no lost book.
+
+**Strengths.**
+- Correct results under every tested configuration: no failed request among 1.47 million, the same
+  answers from both replicas, and identical indexes after duplicates, crashes, more threads or more
+  processes.
+- Low latency below saturation: about 1–2.5 ms at the median.
+- A choreography whose overhead is small.
+
+**Weaknesses.**
+- The single SQLite writer caps indexing at about 18.5 books per second on this host.
+- Each `DatamartStore` call opens a new SQLite connection, which adds a WAL checkpoint per book with
+  a single worker (section 7.y). Keeping one connection per worker is the first optimisation to make.
+- The search ceiling could not be traced to a single component on one machine.
