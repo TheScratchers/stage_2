@@ -103,8 +103,11 @@ No request failed in any experiment, and every configuration kept correct result
 | 32 | 5,315 | 5.86 | 6.95 | 13.70 | 5,215 | 5.85 | 7.52 | 18.79 |
 | 64 | 5,242 | 11.93 | 13.44 | 22.09 | 5,099 | 11.61 | 15.56 | 41.25 |
 
-*Figure 7.x.1 (to draw from Table 7.x.1). Throughput and p50 latency against the number of
-clients, one line per replica count.*
+![Throughput and median latency of GET /search against the number of clients, with 1 and 2 replicas](figures/search-latency.png)
+
+*Figure 7.x.1. Throughput (left) and median latency (right) of `GET /search` against the number of
+concurrent clients, with 1 and 2 Search replicas. Data of Table 7.x.1; drawn by
+`docs/report/figures/plot_search_latency.py`.*
 
 - **Saturation at 16 clients.** Throughput grows almost linearly up to 8 clients and peaks at
   16 clients, with about 5,500 requests per second. Beyond that point it stays flat or drops
