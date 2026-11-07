@@ -6,7 +6,6 @@
   were computed from those files.
 -->
 
-<!-- TO CONFIRM: the disk type of the reference machine is not recorded in host.txt (ask Pablo). -->
 
 The integration benchmarks measure the whole system as it is deployed on the Stage 2 host: four
 kinds of process (broker, Ingestion, Indexing and Search), each in its own JVM, coordinating through
@@ -25,7 +24,7 @@ procedure is in `benchmarks/README.md`.
 |---|---|
 | CPU | 13th Gen Intel Core i7-13700KF, 24 logical processors |
 | RAM | 31.9 GB |
-| Disk | TO CONFIRM |
+| Disk | 1 TB NVMe M.2 SSD (Kioxia Exceria G2, PCIe 3.0 x4) |
 | OS | Windows 11 (amd64) |
 | JDK | Eclipse Temurin 21.0.12 (OpenJDK 64-Bit Server VM) |
 | Commit | `04132ab` |
