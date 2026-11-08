@@ -52,7 +52,7 @@ GLOBAL_RENUMBERING = [
 ]
 
 PREAMBLE = r"""
-#set document(title: "Stage 2: Service-Oriented Search Engine", author: ("Pablo Martínez Suárez", "Amado Artiles Rodríguez", "Aimar Alejandro Santana"))
+#set document(title: "Stage 2: Service-Oriented Search Engine", author: ("Pablo Martínez Suárez", "Amado Artiles Rodríguez", "Aimar Daniel Alejandro Santana"))
 #set text(font: "Libertinus Serif", size: 10.5pt, lang: "en")
 #set par(justify: true, leading: 0.6em)
 #show raw: set text(font: "DejaVu Sans Mono", size: 7.6pt)
