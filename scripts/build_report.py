@@ -64,6 +64,7 @@ PREAMBLE = r"""
 #show table: set par(justify: false)
 #show figure: set block(breakable: true)
 #show link: set text(fill: rgb("#1d4ed8"))
+#let horizontalrule = line(length: 100%, stroke: 0.4pt + luma(190))
 """
 
 PAGE_SETUP = r"""
