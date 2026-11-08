@@ -26,7 +26,7 @@ function Setting($name, $default) {
     if ([string]::IsNullOrWhiteSpace($value)) { return $default } else { return $value }
 }
 
-$DataDir = [IO.Path]::GetFullPath((Setting "DATA_DIR" "data"))
+$DataDir = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath((Setting "DATA_DIR" "data"))
 $BrokerPort = [int](Setting "BROKER_PORT" 61616)
 $IngestionPort = [int](Setting "INGESTION_PORT" 7001)
 $IndexingPort = [int](Setting "INDEXING_PORT" 7002)

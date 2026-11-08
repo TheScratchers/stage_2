@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 Set-Location (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "..")
 
 $dataDir = if ([string]::IsNullOrWhiteSpace($env:DATA_DIR)) { "data" } else { $env:DATA_DIR }
-$runDir = Join-Path ([IO.Path]::GetFullPath($dataDir)) "run"
+$runDir = Join-Path ($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($dataDir)) "run"
 $pidFiles = @(Get-ChildItem -Path $runDir -Filter *.pid -ErrorAction SilentlyContinue)
 if ($pidFiles.Count -eq 0) {
     Write-Host "Nothing to stop: no PID files in $runDir"
