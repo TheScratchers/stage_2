@@ -14,7 +14,10 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 BOOKS_FILE="${1:-samples/books.txt}"
 INGESTION="http://localhost:${INGESTION_PORT:-7001}"
 INDEXING="http://localhost:${INDEXING_PORT:-7002}"
-mapfile -t ids < <(sed -e 's/\r$//' -e 's/^[[:space:]]*//;s/[[:space:]]*$//' "$BOOKS_FILE" | grep -v -e '^#' -e '^$')
+ids=()
+while IFS= read -r line || [ -n "$line" ]; do
+    ids+=("$line")
+done < <(sed -e 's/\r$//' -e 's/^[[:space:]]*//;s/[[:space:]]*$//' "$BOOKS_FILE" | grep -v -e '^#' -e '^$')
 
 echo "Ingesting ${#ids[@]} books through $INGESTION"
 failed=0
