@@ -1,5 +1,5 @@
 
-#set document(title: "Stage 2: Service-Oriented Search Engine", author: ("Pablo Martínez Suárez", "Amado Artiles Rodríguez", "Aimar Alejandro Santana"))
+#set document(title: "Stage 2: Service-Oriented Search Engine", author: ("Pablo Martínez Suárez", "Amado Artiles Rodríguez", "Aimar Daniel Alejandro Santana"))
 #set text(font: "Libertinus Serif", size: 10.5pt, lang: "en")
 #set par(justify: true, leading: 0.6em)
 #show raw: set text(font: "DejaVu Sans Mono", size: 7.6pt)
@@ -11,6 +11,7 @@
 #show table: set par(justify: false)
 #show figure: set block(breakable: true)
 #show link: set text(fill: rgb("#1d4ed8"))
+#let horizontalrule = line(length: 100%, stroke: 0.4pt + luma(190))
 
 #set page(
   paper: "a4",
@@ -36,7 +37,7 @@
 <stage-2-service-oriented-search-engine-soa>
 #strong[Subject:] Big Data \ #strong[Degree:] Grado en Ciencia e Ingeniería de Datos (GCID) \ #strong[Institution:] Escuela de Ingeniería Informática, Universidad de Las Palmas de Gran Canaria (ULPGC) \ #strong[Academic Year:] 2026/2027 \ #strong[Team:] TheScratchers \ #strong[Repository:] #link("https://github.com/TheScratchers/stage_2")[#link("https://github.com/TheScratchers/stage_2")]
 
-#divider()
+#horizontalrule
 
 === Authors and Responsibilities
 <authors-and-responsibilities>
@@ -46,14 +47,14 @@
     align: (auto,auto,auto,auto,auto,),
     table.header([Student], [Student ID], [Contact], [Module Responsibilities], [Report Contributions],),
     table.hline(),
-    [#strong[Pablo Martínez Suárez]], [TO FILL], [#link("mailto:pablomrtinezzz@gmail.com")[pablomrtinezzz\@gmail.com]], [Ingestion Service, Embedded ActiveMQ Broker, Execution Scripts, Ingestion Benchmarks], [Cover, Introduction, Architecture, Ingestion Implementation, Ingestion Benchmarks, Final PDF Compilation],
-    [#strong[Amado Artiles Rodríguez]], [TO FILL], [#link("mailto:amadoart22@gmail.com")[amadoart22\@gmail.com]], [Indexing Service, Broker Consumers, Concurrency & Idempotent Transactions, JMH Benchmarks], [Indexing Implementation, Indexing Concurrency, JMH Microbenchmarks],
-    [#strong[Aimar Alejandro Santana]], [TO FILL], [#link("mailto:aimarsaal@gmail.com")[aimarsaal\@gmail.com]], [Search Service, OpenAPI 3.0 Specification, API Validation, Load Client and Integration Benchmarks], [API & Contracts, Search Implementation, Design Decisions, Integration Benchmarks, Conclusions & Stage 3],
+    [#strong[Pablo Martínez Suárez]], [54148890J], [#link("mailto:pablomrtinezzz@gmail.com")[pablomrtinezzz\@gmail.com]], [Ingestion Service, Embedded ActiveMQ Broker, Execution Scripts, Ingestion Benchmarks], [Cover, Introduction, Architecture, Ingestion Implementation, Ingestion Benchmarks, Final PDF Compilation],
+    [#strong[Amado Artiles Rodríguez]], [45783033S], [#link("mailto:amadoart22@gmail.com")[amadoart22\@gmail.com]], [Indexing Service, Broker Consumers, Concurrency & Idempotent Transactions, JMH Benchmarks], [Indexing Implementation, Indexing Concurrency, JMH Microbenchmarks],
+    [#strong[Aimar Daniel Alejandro Santana]], [54385362E], [#link("mailto:aimarsaal@gmail.com")[aimarsaal\@gmail.com]], [Search Service, OpenAPI 3.0 Specification, API Validation, Load Client and Integration Benchmarks], [API & Contracts, Search Implementation, Design Decisions, Integration Benchmarks, Conclusions & Stage 3],
   )]
   , kind: table
   )
 
-#divider()
+#horizontalrule
 
 === Reference Execution Environment
 <reference-execution-environment>
@@ -99,7 +100,7 @@ The system is organized into three decoupled services:
 
 An independent #strong[ActiveMQ Message Broker] process provides asynchronous choreography, serving as the central nervous system that coordinates work between services without direct inter-service HTTP invocations.
 
-#divider()
+#horizontalrule
 
 == 2.2 System Objectives and Non-Functional Goals
 <22-system-objectives-and-non-functional-goals>
@@ -146,7 +147,7 @@ The Stage 2 Search Engine is architected as an event-driven collection of autono
 
 #page(flipped: true)[#figure(image("report/figures/architecture-1.png", width: 100%), caption: [Figure 3.1. Processes, front-end and internal interactions, broker destinations and shared storage, all on one host (rendered from the Mermaid source of this section).], supplement: none, numbering: none)]
 
-#divider()
+#horizontalrule
 
 == 3.2 Event Choreography vs. Central Orchestration
 <32-event-choreography-vs-central-orchestration>
@@ -184,7 +185,7 @@ The message broker enforces two distinct messaging patterns tailored to workflow
   - #strong[Distribution:] Fan-out to every running Search Service replica.
   - #strong[Purpose:] Informs Search replicas that a new book has entered the datamart, prompting them to invalidate their in-memory filter caches (distinct languages and publication years). Searches themselves read committed SQLite WAL snapshots directly from disk, so they never depend on the events. The subscription is not durable: while a replica is disconnected from the broker, or before it has subscribed after a restart, its cache is disabled and every request reads the datamart. On reconnection the cache is emptied and enabled again, so missed events can never leave stale filter values.
 
-#divider()
+#horizontalrule
 
 == 3.3 Storage Isolation and the Single-Writer Principle
 <33-storage-isolation-and-the-single-writer-principle>
@@ -225,7 +226,7 @@ Both `ingestion.db` and `datamart.db` are configured with Write-Ahead Logging (`
 - Multiple Search service replicas can query `datamart.db` concurrently without experiencing lock contention while Indexing commits new book postings in the background.
 - Concurrent SQLite writers are serialised via internal file locks. As established in the official benchmarks (Section 7), scaling Indexing worker threads beyond 2 workers saturates the single-writer lock; thus, true parallelism occurs during in-memory text tokenization, while database commits queue safely.
 
-#divider()
+#horizontalrule
 
 == 3.4 Concurrency and Threading Architecture
 <34-concurrency-and-threading-architecture>
@@ -453,7 +454,7 @@ It is configured through environment variables or system properties via `common.
   , kind: table
   )
 
-#divider()
+#horizontalrule
 
 === 5.1.1 Internal Structure and Package Organization
 <511-internal-structure-and-package-organization>
@@ -480,7 +481,7 @@ The codebase is organized into decoupled packages with single responsibilities a
   , kind: table
   )
 
-#divider()
+#horizontalrule
 
 === 5.1.2 The Ingestion Pipeline: Step-by-Step Execution
 <512-the-ingestion-pipeline-step-by-step-execution>
@@ -567,7 +568,7 @@ The paths are absolute because other processes (Indexing) use them exactly as pu
 <6-event-dispatch>
 After the log is updated, `BookDownloadedPublisher` serializes the `BookDownloaded` event and sends it to the ActiveMQ queue `books.downloaded` as a persistent message. The connection to the broker is opened lazily and re-created after a failure. If the broker cannot take the event, the client receives `503 UNAVAILABLE`. The book stays stored and recorded as `available`, so repeating the request publishes the event again through the fast-path above, and no book is lost.
 
-#divider()
+#horizontalrule
 
 === 5.1.3 Concurrency and Error Semantics
 <513-concurrency-and-error-semantics>
@@ -761,7 +762,7 @@ There are two ways to index in parallel, and both compete for the same queue:
 
 - #strong[Threads.] `INDEXING_WORKERS` consumer threads per process. Each has its own JMS session and
   opens its own SQLite connections; JDBC connections are never shared between threads.
-- #strong[Replicas.] Several Indexing processes on different ports (7002, 7012, \.\.\.) over the same
+- #strong[Replicas.] Several Indexing processes on different ports (7002, 7012, \...) over the same
   `DATA_DIR`. ActiveMQ delivers each message to only one consumer, whatever process it belongs to.
 
 The only state shared between threads is immutable (the configuration and the stateless
@@ -1104,8 +1105,8 @@ partitioned (section 8).
     table.header([Process], [Port], [Replicable], [How work is shared],),
     table.hline(),
     [Ingestion], [7001], [Not tested], [One process; ingestion is bound by Project Gutenberg],
-    [Indexing], [7002, then 7012, 7022, \.\.\.], [Yes], [Competing consumers on one queue, writing one datamart],
-    [Search], [7003, then 7013, 7023, \.\.\.], [Yes], [Stateless apart from a cache; clients spread requests over replicas],
+    [Indexing], [7002, then 7012, 7022, \...], [Yes], [Competing consumers on one queue, writing one datamart],
+    [Search], [7003, then 7013, 7023, \...], [Yes], [Stateless apart from a cache; clients spread requests over replicas],
     [Broker], [61616], [No (one per host)], [---],
   )]
   , kind: table
@@ -1176,7 +1177,7 @@ The Indexing tests show that the result does not depend on the concurrency. 1, 2
 <71-ingestion-throughput-benchmarks>
 The Ingestion Benchmark evaluates the throughput, latency distribution, scalability, and resource footprint of the Ingestion Service under concurrent load. It tests both fresh data ingestion (retrieval from a local Gutenberg stand-in, text demarcation, atomic datalake storage, SQLite ledger logging, and event dispatch) and idempotent re-ingestion (lookup in the ingestion log and re-publication of the event).
 
-#divider()
+#horizontalrule
 
 === 7.1.1 Method and Experimental Setup
 <711-method-and-experimental-setup>
@@ -1212,7 +1213,7 @@ All experiments were executed using the official benchmark harness (`IngestionBe
 - #strong[In-process deployment:] Unlike the integration benchmarks of section 7.3, this harness runs the Ingestion Service (`IngestionApp.start`), the client threads and an embedded, #strong[non-persistent] ActiveMQ broker (`vm://localhost`) inside one JVM. It therefore measures the service\'s own work without the cost of persisting events to KahaDB; that cost is part of the coordination measurements of section 7.3.
 - #strong[Repetitions:] Each concurrency level is measured in 3 consecutive runs. There is no separate warm-up phase, so the first run includes JVM class loading and JIT compilation; the warm-up effect is visible in run 1 with one client and is excluded from the means of Table 7.1.2.
 
-#divider()
+#horizontalrule
 
 === 7.1.2 Benchmark Results
 <712-benchmark-results>
@@ -1290,7 +1291,7 @@ The resident memory of the deployed Ingestion process, measured from outside in 
   , kind: table
   )
 
-#divider()
+#horizontalrule
 
 === 7.1.3 Discussion of Findings
 <713-discussion-of-findings>

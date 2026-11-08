@@ -11,13 +11,11 @@
 
 ### Authors and Responsibilities
 
-<!-- TO FILL before submitting: the student ID of each member (required by section 7.1 of the assignment). -->
-
 | Student | Student ID | Contact | Module Responsibilities | Report Contributions |
 |---|---|---|---|---|
-| **Pablo Martínez Suárez** | TO FILL | pablomrtinezzz@gmail.com | Ingestion Service, Embedded ActiveMQ Broker, Execution Scripts, Ingestion Benchmarks | Cover, Introduction, Architecture, Ingestion Implementation, Ingestion Benchmarks, Final PDF Compilation |
-| **Amado Artiles Rodríguez** | TO FILL | amadoart22@gmail.com | Indexing Service, Broker Consumers, Concurrency & Idempotent Transactions, JMH Benchmarks | Indexing Implementation, Indexing Concurrency, JMH Microbenchmarks |
-| **Aimar Alejandro Santana** | TO FILL | aimarsaal@gmail.com | Search Service, OpenAPI 3.0 Specification, API Validation, Load Client and Integration Benchmarks | API & Contracts, Search Implementation, Design Decisions, Integration Benchmarks, Conclusions & Stage 3 |
+| **Pablo Martínez Suárez** | 54148890J | pablomrtinezzz@gmail.com | Ingestion Service, Embedded ActiveMQ Broker, Execution Scripts, Ingestion Benchmarks | Cover, Introduction, Architecture, Ingestion Implementation, Ingestion Benchmarks, Final PDF Compilation |
+| **Amado Artiles Rodríguez** | 45783033S | amadoart22@gmail.com | Indexing Service, Broker Consumers, Concurrency & Idempotent Transactions, JMH Benchmarks | Indexing Implementation, Indexing Concurrency, JMH Microbenchmarks |
+| **Aimar Daniel Alejandro Santana** | 54385362E | aimarsaal@gmail.com | Search Service, OpenAPI 3.0 Specification, API Validation, Load Client and Integration Benchmarks | API & Contracts, Search Implementation, Design Decisions, Integration Benchmarks, Conclusions & Stage 3 |
 
 ---
 
