@@ -5,7 +5,7 @@
   benchmarks/results/20261105_ingestion-throughput/ on the team reference machine at commit 04132ab.
 -->
 
-The Ingestion Benchmark evaluates the throughput, latency distribution, scalability, and resource footprint of the Ingestion Service under concurrent load. It tests both fresh data ingestion (end-to-end network retrieval, text demarcation, atomic datalake storage, SQLite ledger logging, and broker event dispatch) and idempotent re-ingestion (fast-path verification in SQLite).
+The Ingestion Benchmark evaluates the throughput, latency distribution, scalability, and resource footprint of the Ingestion Service under concurrent load. It tests both fresh data ingestion (retrieval from a local Gutenberg stand-in, text demarcation, atomic datalake storage, SQLite ledger logging, and event dispatch) and idempotent re-ingestion (lookup in the ingestion log and re-publication of the event).
 
 ---
 
@@ -30,9 +30,10 @@ All experiments were executed using the official benchmark harness (`IngestionBe
 - **Local Gutenberg Mirror:** Books are served directly from `samples/books/` by a local HTTP mock server. This guarantees that external internet latency or Gutenberg rate-limiting never pollutes the measurements.
 - **Closed-Loop Concurrency:** The benchmark generator maintains a fixed number of concurrent client threads (1, 2, and 4 clients). Each thread submits a synchronous `POST /ingest` request, waits for the HTTP response, and immediately requests the next book without think time.
 - **Fresh vs. Idempotent Passes:**
-  - **Fresh Mode:** Starts with a clean datalake directory and an empty `ingestion.db`. All 20 books undergo complete downloading, text splitting, atomic file writes, SQLite insertion, and JMS message dispatch to ActiveMQ.
-  - **Idempotent Mode:** Immediately re-ingests the same 20 books into the now-populated system. It exercises the fast-path check, validating that redundant operations are detected and short-circuited.
-- **Repetitions:** Each concurrency level is measured across 3 consecutive runs (runs 1, 2, and 3) to account for JVM JIT compilation warm-up and operating system file cache effects.
+  - **Fresh Mode:** Starts with a clean datalake directory and an empty `ingestion.db`. All 20 books undergo complete downloading, text splitting, atomic file writes, SQLite insertion, and JMS message dispatch.
+  - **Idempotent Mode:** Immediately re-ingests the same 20 books into the now-populated system. It exercises the fast path: the ingestion log is checked, nothing is downloaded or written, and the `BookDownloaded` event is published again.
+- **In-process deployment:** Unlike the integration benchmarks of section 7.x, this harness runs the Ingestion Service (`IngestionApp.start`), the client threads and an embedded, **non-persistent** ActiveMQ broker (`vm://localhost`) inside one JVM. It therefore measures the service's own work without the cost of persisting events to KahaDB; that cost is part of the coordination measurements of section 7.x.
+- **Repetitions:** Each concurrency level is measured in 3 consecutive runs. There is no separate warm-up phase, so the first run includes JVM class loading and JIT compilation; the warm-up effect is visible in run 1 with one client and is excluded from the means of Table 7.z.2.
 
 ---
 
@@ -61,18 +62,20 @@ All experiments were executed using the official benchmark harness (`IngestionBe
 | 4 | 3 | fresh | 20 | 0 | 0.182 | 109.88 | 33.81 | 25.96 | 59.41 | 59.96 | 59.96 |
 | 4 | 3 | idempotent | 20 | 0 | 0.115 | 174.37 | 22.05 | 14.38 | 40.08 | 42.16 | 42.16 |
 
-*Table 7.z.2. Aggregated throughput and parallel speed-up scaling factors. Means computed over warm runs (runs 2 and 3 for fresh, runs 1–3 for idempotent). Speed-up is relative to 1 client.*
+*Table 7.z.2. Aggregated throughput and speed-up, computed from Table 7.z.1. Fresh mode: mean of runs 2 and 3 at every level, because run 1 includes the warm-up of the JVM. Idempotent mode: mean of the 3 runs, which run on a warm JVM. Speed-up is relative to 1 client.*
 
 | Mode | 1 Client (books/s) | 2 Clients (books/s) | 4 Clients (books/s) | Speed-up 1 → 2 | Speed-up 1 → 4 |
 |---|---:|---:|---:|---:|---:|
-| **Fresh Ingestion** | 43.88 | 74.22 | 111.73 | **1.69×** | **2.55×** |
+| **Fresh Ingestion** | 43.88 | 73.87 | 111.88 | **1.68×** | **2.55×** |
 | **Idempotent Fast-Path** | 112.02 | 168.68 | 172.94 | **1.51×** | **1.54×** |
 
-*Table 7.z.3. System resource utilization of the Ingestion Service process during the benchmark. Source: `benchmarks/results/20261105_ingestion-throughput/resources-summary.csv`.*
+*Table 7.z.3. Resource use of the benchmark JVM (Ingestion Service, client threads and embedded broker together) over the whole run, sampled every 250 ms. CPU is `OperatingSystemMXBean.getProcessCpuLoad()`, a share of the whole machine (100 % = all 24 logical processors). Memory is the Java heap in use (`totalMemory - freeMemory`), not the resident memory of the process. Source: `benchmarks/results/20261105_ingestion-throughput/resources-summary.csv` (columns `mean_cpu_percent`, `max_cpu_percent`, `max_rss_mb`).*
 
-| Process | Mean CPU (%) | Peak CPU (%) | Peak Resident Memory (RSS MB) |
+| Process | Mean CPU (% of the machine) | Peak CPU (% of the machine) | Peak Java heap in use (MB) |
 |---|---:|---:|---:|
-| `ingestion-service` | 7.9 % | 28.2 % | 279.1 MB |
+| Benchmark JVM | 7.9 % | 28.2 % | 279.1 MB |
+
+The resident memory of the deployed Ingestion process, measured from outside in the integration benchmarks, is about 293 MB (Table 7.x.4).
 
 *Table 7.z.4. Storage footprint on disk generated by ingesting the 20-book corpus. Source: `benchmarks/results/20261105_ingestion-throughput/disk.csv`.*
 
@@ -87,9 +90,9 @@ All experiments were executed using the official benchmark harness (`IngestionBe
 ## 7.z.3 Discussion of Findings
 
 ### 1. Fresh Ingestion Scales Concurrently
-Fresh ingestion exhibits near-linear scaling when transitioning from 1 to 2 concurrent clients (**1.69× speed-up**, rising from 43.9 to 74.2 books/s) and continues to scale strongly at 4 clients (**2.55× speed-up**, reaching 111.7 books/s).
-- **Why Ingestion scales where Indexing hits a ceiling:** In Section 7.y, the Indexing benchmarks revealed that database persistence stops scaling after 2 threads because all worker threads compete for the single write lock on `datamart.db`. In stark contrast, fresh ingestion spends the vast majority of its cycle executing independent string transformations (Gutenberg marker parsing in `GutenbergText`) and writing separate, uncoupled filesystem artifacts (`<book_id>.header.txt` and `<book_id>.body.txt`). Because each book writes to distinct filesystem inodes, there is **zero filesystem write contention**.
-- The only shared resource is `ingestion.db`. However, recording a book's completion requires only a single, millisecond-level `INSERT OR REPLACE` query. Operating in SQLite WAL mode, this brief transaction represents less than 2 % of total request duration, allowing 4 concurrent clients to operate with virtually no lock contention.
+Fresh ingestion scales well with the number of clients: **1.68×** from 1 to 2 clients (43.9 → 73.9 books/s) and **2.55×** with 4 clients (111.9 books/s).
+- **Why Ingestion scales where Indexing hits a ceiling:** In section 7.y, persisting the index stops improving after 2 threads, because every thread competes for the single write lock of `datamart.db`. Ingestion has no such shared hot spot: each book is fetched, split and written to its own files (`<book_id>.header.txt` and `<book_id>.body.txt`), so different books do not wait for each other.
+- The only shared write is one `INSERT OR REPLACE` per book into `ingestion.db`, a single short statement serialized by SQLite. The near-linear scaling up to 4 clients indicates that it is not a bottleneck at this scale.
 
 ### 2. JIT Warm-Up and Latency Distribution
 In Run 1 with 1 client, the maximum latency reached 392.4 ms due to one-time JVM classloading, Javalin/Jetty initialization, and initial JIT tier compilation. By Run 2, the pipeline is fully compiled:
@@ -98,14 +101,19 @@ In Run 1 with 1 client, the maximum latency reached 392.4 ms due to one-time JVM
 - Even under 4 concurrent clients generating over 111 operations per second, median latency remains exceptionally low at **27.0 ms**.
 
 ### 3. Saturation of the Idempotent Fast-Path
-When books are already present in the datalake, the service skips network fetching, text parsing, and file writes, relying strictly on a quick `SELECT status FROM ingestion_log` query.
-- With 1 client, throughput immediately leaps to **112.0 books/s** (median latency: **7.5 ms**).
-- With 2 clients, throughput scales to **168.7 books/s** (median latency: **9.7 ms**).
-- With 4 clients, throughput plateaus at **172.9 books/s**.
-- **Analysis of the 173 books/s ceiling:** In idempotent mode, the entire business operation completes in under 2 ms. At this speed, the bottleneck shifts entirely from application code to the loopback TCP network stack and Javalin's HTTP request-dispatch overhead. The client and server processes exhaust connection dispatch capacity on the loopback interface, establishing an upper operational ceiling of ~173 ops/second.
+When books are already available, the service skips fetching, splitting and writing: it looks the book up in `ingestion_log` and publishes the `BookDownloaded` event again.
+- With 1 client, throughput rises to **112.0 books/s** (median latency about **7.8 ms**).
+- With 2 clients, throughput reaches **168.7 books/s** (median latency about **9.7 ms**).
+- With 4 clients, throughput stays at **172.9 books/s**, while the median latency grows to about **15 ms**: the extra clients mostly wait.
+- **The ~173 books/s ceiling:** this benchmark does not record where the time of a fast-path request is spent, so the cause of the plateau cannot be identified from these data. Each request still makes an SQLite query and sends a JMS message, and the 4 client threads share one JVM with the service and the broker. Each run handles only 20 requests in about 0.12 s, so these figures are indicative rather than precise.
 
 ### 4. Zero Error Rate and Fault Resilience
-Across all 18 benchmark executions (comprising 360 individual book ingestion operations), **zero errors were recorded** (`errors = 0`). The atomic move pattern (`StandardCopyOption.ATOMIC_MOVE`) ensured that no truncated files were left on disk, and the SQLite WAL ledger maintained full consistency throughout.
+Across all 18 benchmark executions (360 ingestion requests), **zero errors were recorded** (`errors = 0`), and every fresh run stored the complete corpus (11.29 MB in 40 files).
 
 ### 5. Resource Footprint
-The Ingestion Service operates with minimal system overhead. Across the entire high-concurrency run, the service consumed an average of only **7.9 % CPU** (peaking at 28.2 % during 4-client bursts) across the reference machine's 24 logical processors. Memory consumption peaked at **279.1 MB RSS**, well below the allocated 1 GB JVM ceiling (`-Xmx1g`), confirming that text buffers are cleanly reclaimed by the garbage collector after each book is written.
+The whole benchmark JVM (service, clients and broker) used on average **7.9 %** of the machine, about 1.9 of its 24 logical processors, with a peak of **28.2 %** (about 6.8 processors). Its Java heap in use peaked at **279.1 MB**. The machine was therefore far from saturated: the limits observed above come from the work of each request, not from a lack of CPU.
+
+### 6. Limits of the Evidence
+- Each run ingests only the 20 corpus books and lasts between 0.12 and 0.84 s, so single runs are sensitive to scheduling noise; the three repetitions show this spread.
+- The service, the clients and a non-persistent broker share one JVM, so the figures exclude the persistence of events in KahaDB and do not separate the CPU of the service from that of the clients.
+- Books come from a local stand-in, so the real cost of downloading from Project Gutenberg over the Internet is not part of these figures.

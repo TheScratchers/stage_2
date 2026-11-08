@@ -38,7 +38,7 @@ Services must operate without compile-time or runtime coupling to each other's n
 To prevent concurrency hazards and uncoordinated file mutations, every persistent file on disk is assigned exactly one owning service:
 - The **Datalake** (`DATA_DIR/datalake/`) and the state database `ingestion.db` are written exclusively by the Ingestion Service.
 - The **Datamart** (`DATA_DIR/datamarts/datamart.db`) is written exclusively by the Indexing Service.
-- The **Search Service** maintains zero persistent disk state and opens datamart files in read-only mode (`PRAGMA query_only = ON`).
+- The **Search Service** maintains zero persistent disk state and opens the datamart through read-only SQLite connections (`common.Sqlite.openReadOnly`), so it can never modify it.
 
 ### 3. End-to-End Idempotency and Fault Tolerance
 In distributed environments, network blips, process crashes, and message duplicates are inevitable. The pipeline guarantees full idempotency across every stage:
@@ -47,7 +47,7 @@ In distributed environments, network blips, process crashes, and message duplica
 - Unacknowledged messages resulting from service crashes during indexing are automatically redelivered by ActiveMQ. After five consecutive failures, problematic messages are routed to `ActiveMQ.DLQ` (Dead Letter Queue) rather than blocking the pipeline.
 
 ### 4. High Concurrency and Predictable Latency
-- The Search API must sustain concurrent user traffic with bounded response latencies (targeting sub-millisecond to low-millisecond latencies under moderate loads).
+- The Search API must sustain concurrent user traffic with bounded response latencies (targeting low-millisecond latencies under moderate loads).
 - The Ingestion pipeline must support parallel client requests without corrupting the datalake or starving system I/O.
 - The Indexing Service must exploit multi-core architectures through concurrent worker pools while respecting SQLite's single-writer database lock.
 

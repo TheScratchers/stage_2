@@ -17,119 +17,109 @@ It is configured through environment variables or system properties via `common.
 
 ---
 
+
 ## 5.x.1 Internal Structure and Package Organization
 
-The codebase is organized into cleanly decoupled packages adhering strictly to single-responsibility principles and downward-only dependencies:
+The codebase is organized into decoupled packages with single responsibilities and downward-only dependencies:
 
 | Package | Class / Component | Responsibility |
 |---|---|---|
-| `ingestion` | `IngestionApp` | Service entry point; parses environment configuration, initialises dependencies, maps Javalin HTTP routes (`/health`, `/ingest`), and registers JVM shutdown hooks. |
-| `ingestion` | `IngestionService` | Core business orchestrator; checks idempotency in SQLite, delegates downloading, invokes text splitting, coordinates atomic datalake storage, updates the ledger, and triggers event publishing. |
-| `ingestion` | `BookDownloader` | High-level downloader handling HTTP retries, exponential backoff, and error translation into domain exceptions. |
-| `ingestion` | `IngestResult` | Immutable record representing the operation outcome (`bookId`, `status`, `message`, `headerPath`, `bodyPath`). |
-| `ingestion.gutenberg` | `GutenbergClient` | Low-level HTTP client executing HTTP GET requests against the configured Gutenberg base URL. |
-| `ingestion.gutenberg` | `GutenbergText` | Pure algorithmic text processor; identifies Gutenberg boundary markers, normalizes line endings (`\r\n` → `\n`), and splits text into header and body segments. |
-| `ingestion.gutenberg` | `SplitBook` | Immutable data carrier containing separated `headerText` and `bodyText`. |
-| `ingestion.datalake` | `DatalakeLayout` | Computes deterministic, normalized filesystem paths based on ingestion timestamp and book identifier (`yyyyMMdd/HH/<book_id>.*.txt`). |
-| `ingestion.datalake` | `DatalakeWriter` | Implements atomic file writing using temporary files and filesystem-level atomic rename operations. |
-| `ingestion.datalake` | `IngestionLogStore` | Manages local SQLite connection and CRUD queries for `DATA_DIR/datalake/ingestion.db`. |
-| `ingestion.datalake` | `IngestionRecord` | Model representing a row in `ingestion_log` (`book_id`, `status`, `header_path`, `body_path`, `ingested_at`). |
-| `ingestion.broker` | `BookDownloadedPublisher` | JMS message producer; constructs JSON payloads and dispatches `BookDownloaded` events onto the `books.downloaded` queue with `DeliveryMode.PERSISTENT`. |
-| `ingestion.broker` | `BookDownloadedEvent` | Strongly-typed record serialized to JSON matching the contract schema in `docs/contracts.md`. |
+| `ingestion` | `IngestionApp` | Service entry point; wires the dependencies from the configuration and maps the Javalin routes `/health`, `POST /ingest/{book_id}`, `GET /ingest/status/{book_id}` and `GET /ingest/list`, translating failures into the common error envelope. |
+| `ingestion` | `IngestionService` | Core business logic: checks the ingestion log, delegates the download, records the result and publishes the `BookDownloaded` event. |
+| `ingestion` | `BookDownloader` | Downloads one book, splits it and stores both files in the datalake (download → split → store). It keeps no state, so several threads can download different books at the same time. |
+| `ingestion` | `IngestResult` | Immutable record returned by `POST /ingest/{book_id}` (`bookId`, `status`, `path`). |
+| `ingestion.gutenberg` | `GutenbergClient` | HTTP client of Project Gutenberg (`/cache/epub/{id}/pg{id}.txt`). One shared `HttpClient`, with a connection and request timeout (`GUTENBERG_TIMEOUT_SECONDS`). It maps HTTP 404 to `NOT_FOUND` and any other status, timeout or network failure to `UPSTREAM_ERROR`. |
+| `ingestion.gutenberg` | `GutenbergText` | Pure text processor: finds the START and END markers (case-insensitive, `THE` or `THIS`) and splits the text into header and body. |
+| `ingestion.gutenberg` | `SplitBook`, `DownloadException` | Header and body of a book; download failure with its reason (`NOT_FOUND`, `UPSTREAM_ERROR`, `INVALID_FORMAT`). |
+| `ingestion.datalake` | `DatalakeLayout` | Computes the directory of a book from the ingestion time (UTC) and the configured layout (`yyyyMMdd/HH/` by default). |
+| `ingestion.datalake` | `DatalakeWriter` | Writes each file atomically: temporary file, then atomic move to its final name. |
+| `ingestion.datalake` | `IngestionLogStore`, `IngestionRecord` | SQL access to `ingestion_log` in `DATA_DIR/datalake/ingestion.db` (`book_id`, `status`, `header_path`, `body_path`, `ingested_at`). |
+| `ingestion.broker` | `BookDownloadedPublisher`, `BookDownloadedEvent` | Publishes the persistent `BookDownloaded` JSON event on the `books.downloaded` queue, as specified in `docs/contracts.md`. |
 
 ---
 
 ## 5.x.2 The Ingestion Pipeline: Step-by-Step Execution
 
-When a client or automated script initiates an ingestion request via `POST /ingest` with `{"book_id": 1342}`, the service executes the following sequence:
+A client or script ingests a book with `POST /ingest/{book_id}` (for example `POST /ingest/1342`; there is no request body). The service executes the following sequence:
 
 ```
-  POST /ingest
+  POST /ingest/{book_id}
        |
        v
-+--------------+   Exists in SQLite &
-| Idempotency  |---------------------> Return 200 OK (already_available)
-| Check        |   Files Present?      (Fast-path: no network or disk write)
++--------------+   Status 'available'
+| Ingestion    |----------------------> Re-publish BookDownloaded
+| log check    |   in ingestion_log      Return 200 OK (status: already_available)
 +-------+------+
-        | Not present / failed
+        | Not ingested yet, or 'failed'
         v
 +--------------+
-| HTTP Fetch   |-----> Download raw text from Gutenberg / local mirror
-+-------+------+       (3 retries with exponential backoff: 500ms, 1000ms, 2000ms)
+| HTTP fetch   |-----> GET /cache/epub/{id}/pg{id}.txt (timeout GUTENBERG_TIMEOUT_SECONDS)
++-------+------+       404 -> log 'failed', answer 404 NOT_FOUND
+        |              other error / timeout -> log 'failed', answer 502 UPSTREAM_ERROR
+        v
++--------------+
+| Split text   |-----> START/END Gutenberg markers -> header and body
++-------+------+       no markers -> INVALID_FORMAT, nothing is written
         |
         v
 +--------------+
-| Split Text   |-----> Scan for canonical START/END Gutenberg markers
-+-------+------+       Separate into Header and Body strings
+| Atomic write |-----> <id>.body.txt and <id>.header.txt written to temporary files
++-------+------+       Files.move(..., ATOMIC_MOVE) -> no partial file is ever visible
         |
         v
 +--------------+
-| Atomic Write |-----> Write to <id>.header.txt.tmp & <id>.body.txt.tmp
-+-------+------+       Files.move(..., ATOMIC_MOVE) -> guarantees no partial files
+| Ingestion log|-----> INSERT OR REPLACE INTO ingestion_log
++-------+------+       status = 'available', absolute paths, UTC timestamp
         |
         v
 +--------------+
-| SQLite Log   |-----> INSERT OR REPLACE INTO ingestion_log
-+-------+------+       Set status = 'available', record paths & UTC timestamp
+| Broker event |-----> Publish BookDownloaded to the books.downloaded queue (persistent)
++-------+------+       broker unavailable -> answer 503 UNAVAILABLE (the book stays stored)
         |
         v
-+--------------+
-| Broker Event |-----> Publish BookDownloaded to queue books.downloaded
-+-------+------+       (Persistent JMS Message, deliveryMode = PERSISTENT)
-        |
-        v
-   Return 201 Created ({"status": "downloaded", "book_id": 1342, ...})
+   Return 200 OK ({"book_id": 1342, "status": "downloaded", "path": "..."})
 ```
 
 ### 1. Idempotency Fast-Path
-Before opening any network connections, `IngestionService` queries `ingestion.db`. If book 1342 is already recorded with status `available` and both files exist on disk, the call immediately short-circuits and returns HTTP `200 OK` (`already_available`). As demonstrated in the official benchmarks (Section 7), this fast-path answers in under 8 ms without triggering redundant network downloads, disk writes, or broker events.
+Before any download, `IngestionService` looks the book up in `ingestion.db`. If it is already recorded as `available`, nothing is downloaded or written again: the service **re-publishes** the `BookDownloaded` event with the recorded paths and returns `200 OK` with `status: already_available`. Re-publishing makes a repeated request the recovery procedure for an event that was lost; it is harmless because indexing a book is idempotent. As the official benchmarks show (section 7.z), this path answers in about 7–16 ms at the median, depending on the number of concurrent clients.
 
-### 2. Network Acquisition and Resilience
-If the book is absent, `BookDownloader` requests the raw text via `GutenbergClient`. Network flakiness is handled gracefully:
-- Connections use a strict 30-second timeout.
-- Failed attempts (e.g., HTTP 5xx or `SocketTimeoutException`) trigger up to 3 automatic retries with exponential backoff (500 ms, 1000 ms, 2000 ms).
-- If the book does not exist on the remote server (HTTP 404), the service immediately records a `failed` entry in `ingestion_log` and returns `404 NOT_FOUND` without retrying.
+### 2. Network Acquisition
+If the book is not available yet, `BookDownloader` fetches the raw text through `GutenbergClient`:
+- The connection and the request have a timeout (`GUTENBERG_TIMEOUT_SECONDS`, 30 s by default), so a slow or silent server cannot block a request forever.
+- There are no automatic retries inside the service. If Gutenberg answers with an error other than 404, times out or cannot be reached, the attempt is recorded as `failed` in `ingestion_log` and the client receives `502 UPSTREAM_ERROR`. It can simply repeat the request later.
+- If the book does not exist (HTTP 404), the attempt is recorded as `failed` and the client receives `404 NOT_FOUND`; repeating the request gives the same answer.
 
-### 3. Text Demarcation and Normalization
-Project Gutenberg texts prepend licensing and bibliographic headers and append legal disclaimers. `GutenbergText` isolates the substantive literary work using standard demarcation regex patterns:
-- **Header:** Everything prior to `*** START OF THE PROJECT GUTENBERG EBOOK <TITLE> ***`.
-- **Body:** The content following the start delimiter up to `*** END OF THE PROJECT GUTENBERG EBOOK <TITLE> ***`.
-- If markers are absent (common in older Gutenberg transcriptions), the splitter logs a warning and stores the entire text as the body with a minimal synthetic header, preventing download failure.
+### 3. Text Demarcation
+Project Gutenberg texts surround the literary work with a header and a license. `GutenbergText` isolates it with the standard markers, matched case-insensitively and accepting both `THE` and `THIS`:
+- **Header:** everything before the line `*** START OF THE PROJECT GUTENBERG EBOOK ... ***`.
+- **Body:** everything between that line and `*** END OF THE PROJECT GUTENBERG EBOOK ... ***`.
+- If a marker is missing, the text is rejected as `INVALID_FORMAT` and nothing is written to the datalake, so an incomplete or unexpected file never reaches Indexing.
 
 ### 4. Atomic Datalake Persistence
-Writing files directly to their target paths risks exposing partially-written, truncated files if the JVM or host crashes mid-write. `DatalakeWriter` enforces strict filesystem atomicity:
-1. Destination directories (`DATA_DIR/datalake/yyyyMMdd/HH/`) are created recursively.
-2. Content is written to temporary siblings: `<book_id>.header.txt.<uuid>.tmp` and `<book_id>.body.txt.<uuid>.tmp`.
-3. File streams are flushed to disk.
-4. `Files.move(..., StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)` commits the temporary file to its final destination in a single atomic filesystem operation. Downstream readers will either observe the prior file state or the complete new file, never a partial write.
+Writing a file directly to its final path could expose a truncated file if the process crashed mid-write. `DatalakeWriter` prevents it:
+1. The book's directory (`DATA_DIR/datalake/yyyyMMdd/HH/` by default) is created if needed.
+2. Each file is written to a temporary file in the same directory (`<id>.body.txt.<random>.tmp`, then the header).
+3. `Files.move(..., ATOMIC_MOVE, REPLACE_EXISTING)` gives the temporary file its final name in one step. Readers see either the previous file or the complete new one, never a partial write. Storing a book again replaces its files.
 
-### 5. Persistent Ledger Commit
-The newly stored paths and timestamp are committed to `DATA_DIR/datalake/ingestion.db` within a single SQLite transaction:
+### 5. Ingestion Log
+The absolute paths of both files and the ingestion time are recorded in `DATA_DIR/datalake/ingestion.db` with one statement:
 ```sql
-INSERT INTO ingestion_log (book_id, status, header_path, body_path, ingested_at)
-VALUES (?, 'available', ?, ?, ?)
-ON CONFLICT(book_id) DO UPDATE SET
-  status = excluded.status,
-  header_path = excluded.header_path,
-  body_path = excluded.body_path,
-  ingested_at = excluded.ingested_at;
+INSERT OR REPLACE INTO ingestion_log(book_id, status, header_path, body_path, ingested_at)
+VALUES (?, 'available', ?, ?, ?);
 ```
+The paths are absolute because other processes (Indexing) use them exactly as published, whatever their working directory.
 
-### 6. Asynchronous Event Dispatch
-Once the database transaction is safely committed, `BookDownloadedPublisher` serializes a `BookDownloaded` JSON event and publishes it to the ActiveMQ queue `books.downloaded`. The JMS message is marked `DeliveryMode.PERSISTENT`, guaranteeing that ActiveMQ writes it to KahaDB disk storage before returning control.
+### 6. Event Dispatch
+After the log is updated, `BookDownloadedPublisher` serializes the `BookDownloaded` event and sends it to the ActiveMQ queue `books.downloaded` as a persistent message. The connection to the broker is opened lazily and re-created after a failure. If the broker cannot take the event, the client receives `503 UNAVAILABLE`. The book stays stored and recorded as `available`, so repeating the request publishes the event again through the fast-path above, and no book is lost.
 
 ---
 
 ## 5.x.3 Concurrency and Error Semantics
 
-- **Thread Safety:** All components in `ingestion-service` are strictly thread-safe. `IngestionService` maintains no mutable state; each HTTP worker thread handles its own request, executes text operations independently, and obtains its own SQLite connection from the connection provider.
-- **SQLite Concurrency:** Because `ingestion.db` operates in WAL mode (`journal_mode=WAL`), concurrent client threads do not block each other while preparing requests or reading book status. Brief database write transactions are coordinated via SQLite's internal locking mechanism with a 5-second `busy_timeout`.
-- **Error Envelope:** All HTTP errors adhere to the project's universal JSON error envelope:
+- **Thread Safety:** Javalin's Jetty threads serve the requests concurrently. `IngestionService` and `BookDownloader` hold no mutable state, every call opens its own SQLite connection, and the publisher synchronizes access to its shared JMS connection, so several books can be ingested at the same time. Section 7.z measures the effect of 1, 2 and 4 concurrent clients.
+- **SQLite Concurrency:** `ingestion.db` uses the project's settings (`journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=5000`). Status queries do not block, and the short write statements are serialized by SQLite, waiting up to 5 s for the lock.
+- **Error Envelope:** Every HTTP error uses the project's common envelope, for example:
   ```json
-  {
-    "error": "DOWNLOAD_FAILED",
-    "message": "Gutenberg book 999999 was not found on remote server",
-    "status": 404,
-    "timestamp": "2026-11-05T17:52:10.123Z"
-  }
+  {"error": {"code": "NOT_FOUND", "message": "Book 99999999 does not exist on Project Gutenberg"}}
   ```
+  The codes used by the Ingestion Service are `400 INVALID_PARAMETER` (invalid id), `404 NOT_FOUND` (book missing on Gutenberg, or never ingested for the status endpoint), `502 UPSTREAM_ERROR`, `503 UNAVAILABLE` (broker down) and `500 INTERNAL_ERROR`, whose details are only logged.

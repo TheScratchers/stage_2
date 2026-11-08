@@ -39,9 +39,9 @@ flowchart TD
 
     %% Client Calls
     User -->|GET /search\nGET /books/{id}| Search1
-    User -.->|Round-Robin / Load Balanced| Search2
-    Op -->|POST /ingest| Ingest
-    Op -->|POST /index/rebuild| Index
+    User -.->|Client-side round-robin\n(no load balancer on one host)| Search2
+    Op -->|POST /ingest/{id}| Ingest
+    Op -->|POST /index/update/{id}\nPOST /index/rebuild| Index
 
     %% Ingestion flow
     Ingest -->|1. Atomic File Write| Datalake
@@ -53,7 +53,7 @@ flowchart TD
     Index -->|5. Read Raw Text| Datalake
     Index -->|6. Atomic Transaction| DatamartDB
     Index -->|7. Publish Event| T_Idx
-    Index -.->|Read Paths for Rebuild| IngestDB
+    Index -.->|Read-only lookup\nfor update and rebuild| IngestDB
 
     %% Search flow
     T_Idx -->|8. Invalidate Cache| Search1
@@ -83,25 +83,24 @@ The message broker enforces two distinct messaging patterns tailored to workflow
    - **Delivery Mode:** `PERSISTENT` (backed by KahaDB write-ahead logs on disk).
    - **Distribution:** Competing Consumers pattern. Worker threads across one or more Indexing processes compete for messages.
    - **Prefetch Policy:** Set to `prefetch=1`. This prevents a single fast thread or worker from hoarding batches of books while other workers sit idle, ensuring optimal load distribution across multi-threaded workers.
-   - **Acknowledgement Mode:** Manual acknowledgement (`CLIENT_ACKNOWLEDGE` / transacted JMS session). The consumer explicitly acknowledges the message **only after** the SQLite transaction inserting metadata and inverted postings has successfully committed to disk. If the indexing process crashes or encounters an unhandled exception before commit, the broker detects the disconnection and redelivers the message to an available worker.
-   - **Dead Letter Strategy:** ActiveMQ is configured with a `RedeliveryPolicy` of up to 5 redeliveries with exponential backoff. Poison pills (such as malformed files that crash parser threads) are automatically redirected to `ActiveMQ.DLQ` without halting the ingestion or indexing pipelines.
+   - **Acknowledgement Mode:** Transacted JMS session (`SESSION_TRANSACTED`), one per worker thread. The consumer commits the session, which acknowledges the message and releases its `BookIndexed` event, **only after** the SQLite transaction with the book's metadata and postings has committed. If indexing fails, the session is rolled back; if the process crashes, the broker detects the lost connection. In both cases the message is redelivered to an available worker.
+   - **Dead Letter Strategy:** The broker's `RedeliveryPlugin` redelivers a failed message up to 5 times with a fixed delay of 2 s (no exponential backoff); client-side redelivery is disabled so that only the broker counts attempts. Poison messages (unreadable JSON, invalid events or missing files) then go to `ActiveMQ.DLQ` without halting the ingestion or indexing pipelines.
 
 2. **`books.indexed` (Topic - Publish/Subscribe):**
    - **Delivery Mode:** Broadcast to all active subscribers.
    - **Distribution:** Fan-out to every running Search Service replica.
-   - **Purpose:** Informs Search replicas that a new book has entered the datamart, prompting them to invalidate their in-memory filter caches (distinct languages and publication years). Because Search is stateless and queries read committed SQLite WAL snapshots directly from disk, missing a broadcast topic message during Search restart only causes a momentary cache stale read that refreshes upon the next periodic check.
+   - **Purpose:** Informs Search replicas that a new book has entered the datamart, prompting them to invalidate their in-memory filter caches (distinct languages and publication years). Searches themselves read committed SQLite WAL snapshots directly from disk, so they never depend on the events. The subscription is not durable: while a replica is disconnected from the broker, or before it has subscribed after a restart, its cache is disabled and every request reads the datamart. On reconnection the cache is emptied and enabled again, so missed events can never leave stale filter values.
 
 ---
 
 ## 3.3 Storage Isolation and the Single-Writer Principle
 
-Data storage is partitioned into two physically isolated layers located under `DATA_DIR`:
+Data storage is partitioned into separate directories under `DATA_DIR`, one per owner:
 
 ```
 DATA_DIR/
-├── broker/                  (ActiveMQ KahaDB journal files and indexes)
-│   ├── db-1.log
-│   └── db.data
+├── broker/                  (Owned by the ActiveMQ broker)
+│   └── kahadb/              (KahaDB journal files and indexes: db-1.log, db.data, ...)
 ├── datalake/                (Owned exclusively by Ingestion Service)
 │   ├── ingestion.db         (SQLite database: book_id, status, paths, timestamp)
 │   ├── ingestion.db-wal
@@ -119,7 +118,7 @@ DATA_DIR/
 ### The Single-Writer Principle
 Concurrent file modification across autonomous processes is a notorious source of silent data corruption. Stage 2 resolves this by enforcing that **every file and database has exactly one designated writer process**:
 - **Ingestion Service:** Only writer for the datalake text files and `ingestion.db`.
-- **Indexing Service:** Only writer for `datamart.db`. It opens `ingestion.db` strictly in read-only mode (`PRAGMA query_only = ON`) solely during explicit maintenance operations (`POST /index/rebuild`).
+- **Indexing Service:** Only writer for `datamart.db`. It opens `ingestion.db` strictly read-only (a read-only SQLite connection from `common.Sqlite.openReadOnly`), only to locate the files of available books for the administrative operations `POST /index/update/{book_id}` and `POST /index/rebuild`.
 - **Search Service:** Strictly read-only consumer of `datamart.db`. It never writes to disk.
 - **ActiveMQ Broker:** Only writer for the `broker/` directory.
 
@@ -139,7 +138,7 @@ Every service runs in its own JVM process with a dedicated threading model tailo
 flowchart LR
     subgraph IngestionJVM["Ingestion Service JVM"]
         JavalinIngest["Javalin / Jetty Thread Pool\n(HTTP POST /ingest)"]
-        HTTPClient["HTTP Downloader\n(Async / Retrying)"]
+        HTTPClient["HTTP Downloader\n(Synchronous, with timeout)"]
         AtomicWriter["Datalake Atomic Writer\n(Temp File + Move)"]
         JMSProd["JMS Producer\n(Thread-Safe)"]
         JavalinIngest --> HTTPClient --> AtomicWriter --> JMSProd
@@ -170,7 +169,7 @@ flowchart LR
 2. **Indexing Service:**
    - Spawns `INDEXING_WORKERS` concurrent JMS consumer sessions (default: 2 threads).
    - Each worker retrieves one `BookDownloaded` event (`prefetch=1`), independently reads the text files from the datalake, and tokenizes terms in memory.
-   - SQLite insertions are executed in single-statement transactions, queuing automatically if another worker is currently holding the write transaction lock.
+   - Each book is stored in one SQLite transaction (delete the old postings, insert the new ones, upsert the book and `index_meta`), which waits up to `busy_timeout` if another worker is holding the write lock.
 3. **Search Service:**
    - Handles read traffic using Jetty's worker threads.
-   - Because queries only issue `SELECT` statements, SQLite WAL mode serves concurrent readers simultaneously through shared memory (`.shm`), delivering stable sub-millisecond query execution.
+   - Because queries only issue `SELECT` statements, SQLite WAL mode serves concurrent readers simultaneously through shared memory (`.shm`). Below saturation a search takes about 1–2.5 ms at the median (section 7.x).
