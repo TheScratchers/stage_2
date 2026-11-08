@@ -54,16 +54,34 @@ included in those jars.
 
 ## Run the services
 
-Each service is an independent process:
+Every service is an independent process on this machine. After `mvn clean verify`, the scripts in
+`scripts/` start the whole system, load the fixed corpus and stop it again (PowerShell on Windows,
+bash on Linux and macOS):
 
 ```bash
-java -jar broker/target/broker.jar
-java -jar ingestion-service/target/ingestion-service.jar
-java -jar indexing-service/target/indexing-service.jar
-java -jar search-service/target/search-service.jar
-
-curl http://localhost:7003/health     # {"service":"search-service","status":"UP"}
+./scripts/start-all.sh        # .\scripts\start-all.ps1   broker, Indexing, Search, Ingestion; waits for /health
+./scripts/load-corpus.sh      # .\scripts\load-corpus.ps1 POST /ingest/{id} for samples/books.txt, waits until indexed
+curl "http://localhost:7003/search?q=monster&limit=3"
+./scripts/stop-all.sh         # .\scripts\stop-all.ps1    stops every process; the data is kept
 ```
+
+`start-all` starts the broker first, then the Indexing and Search replicas and finally Ingestion,
+each with `JAVA_OPTS` (default `-Xmx1g`). Each process writes its log to `DATA_DIR/logs/<name>.log`
+and its PID to `DATA_DIR/run/<name>.pid`. Replicas and threads are set with environment variables:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `INDEXING_REPLICAS` | `1` | Indexing processes, on ports `INDEXING_PORT`, `+10`, `+20`, ... (7002, 7012, ...) |
+| `SEARCH_REPLICAS` | `1` | Search processes, on ports `SEARCH_PORT`, `+10`, `+20`, ... (7003, 7013, ...) |
+| `INDEXING_WORKERS` | `2` | Consumer threads of each Indexing process |
+| `BROKER_PORT` | `61616` | Port of the broker; every service gets `BROKER_URL=tcp://localhost:<port>` |
+| `JAVA_OPTS` | `-Xmx1g` | JVM options of every service |
+
+For example, `SEARCH_REPLICAS=2 INDEXING_REPLICAS=2 ./scripts/start-all.sh`
+(PowerShell: `$env:SEARCH_REPLICAS=2; $env:INDEXING_REPLICAS=2; .\scripts\start-all.ps1`).
+
+A single service can also be started by hand, for example
+`java -jar search-service/target/search-service.jar`, with the settings of the next section.
 
 Search API examples (full contract in [`docs/openapi.yaml`](docs/openapi.yaml)):
 
