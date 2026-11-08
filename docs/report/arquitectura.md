@@ -38,10 +38,10 @@ flowchart TD
     end
 
     %% Client Calls
-    User -->|GET /search\nGET /books/{id}| Search1
-    User -.->|Client-side round-robin\n(no load balancer on one host)| Search2
-    Op -->|POST /ingest/{id}| Ingest
-    Op -->|POST /index/update/{id}\nPOST /index/rebuild| Index
+    User -->|"GET /search<br>GET /books/{book_id}"| Search1
+    User -.->|"Client-side round-robin<br>(no load balancer on one host)"| Search2
+    Op -->|"POST /ingest/{book_id}"| Ingest
+    Op -->|"POST /index/update/{book_id}<br>POST /index/rebuild"| Index
 
     %% Ingestion flow
     Ingest -->|1. Atomic File Write| Datalake
@@ -135,8 +135,9 @@ Both `ingestion.db` and `datamart.db` are configured with Write-Ahead Logging (`
 Every service runs in its own JVM process with a dedicated threading model tailored to its operational workload:
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph IngestionJVM["Ingestion Service JVM"]
+        direction LR
         JavalinIngest["Javalin / Jetty Thread Pool\n(HTTP POST /ingest)"]
         HTTPClient["HTTP Downloader\n(Synchronous, with timeout)"]
         AtomicWriter["Datalake Atomic Writer\n(Temp File + Move)"]
@@ -145,6 +146,7 @@ flowchart LR
     end
 
     subgraph IndexingJVM["Indexing Service JVM"]
+        direction LR
         BrokerCons["JMS Message Consumers\n(INDEXING_WORKERS = 2)"]
         TokenPool["Text Tokenizer & Parser\n(CPU-Bound, Parallel)"]
         SQLiteWriter["Single SQLite Transaction\n(I/O-Bound, Serialized Lock)"]
@@ -153,6 +155,7 @@ flowchart LR
     end
 
     subgraph SearchJVM["Search Service JVM"]
+        direction LR
         JavalinSearch["Javalin / Jetty Thread Pool\n(HTTP GET /search)"]
         QueryParser["Query Validator & Tokenizer"]
         SQLiteReaders["SQLite Read Connections\n(Parallel Concurrent WAL Reads)"]
@@ -160,6 +163,8 @@ flowchart LR
         JavalinSearch --> QueryParser --> SQLiteReaders
         TopicCons -.-> JavalinSearch
     end
+
+    IngestionJVM ~~~ IndexingJVM ~~~ SearchJVM
 ```
 
 1. **Ingestion Service:**
