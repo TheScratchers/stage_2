@@ -16,8 +16,10 @@ complemented by internal HTTP endpoints. The shared rules (data ownership, SQLit
 tokenizer, corpus) are in [`docs/contracts.md`](docs/contracts.md), and every HTTP endpoint is
 specified in [`docs/openapi.yaml`](docs/openapi.yaml) (OpenAPI 3.0).
 
-> **Status:** in progress. The broker and the Search API are implemented; the ingestion and
-> indexing endpoints are being added.
+> **Status:** complete. All three services (`ingestion-service`, `indexing-service`, `search-service`),
+> the ActiveMQ broker, automated end-to-end integration tests, and official benchmarks on the reference
+> machine are implemented, verified (`mvn clean verify` passes cleanly across all 9 modules), and
+> thoroughly documented in [`docs/report/`](docs/report/).
 
 ## Repository layout
 
@@ -32,6 +34,7 @@ stage_2/
 ├── api-tests/            # data-driven HTTP checks of the APIs and their expected results
 ├── benchmarks/           # load-client/ (HTTP load generator) and results/ of the integration benchmarks
 ├── samples/              # fixed corpus: books.txt, words.txt and the 20 books split in books/
+├── scripts/              # POSIX and PowerShell runner scripts (benchmarks, automation)
 └── docs/
     ├── contracts.md      # shared contracts between services
     └── openapi.yaml      # versioned HTTP API specification (OpenAPI 3.0)
@@ -136,6 +139,21 @@ All tests, API checks and benchmarks use the same 20 Gutenberg books (`samples/b
 same 10 query words (`samples/words.txt`), inherited from Stage 1. The books are bundled in
 `samples/books/` already split into `<id>.header.txt` and `<id>.body.txt`, so tests run offline.
 
+## Ingestion benchmarks
+
+The Ingestion Service throughput and latency benchmark (`IngestionBenchmark.java`) evaluates fresh
+and idempotent ingestion across 1, 2, and 4 concurrent clients:
+
+```bash
+# POSIX (Linux / macOS)
+./scripts/run-ingestion-benchmark.sh
+
+# Windows (PowerShell)
+.\scripts\run-ingestion-benchmark.ps1
+```
+
+Results are stored in `benchmarks/results/<date>_ingestion-throughput/`.
+
 ## Microbenchmarks (JMH)
 
 JMH benchmarks live in `src/test/java/.../benchmark/` of each service. To run those of one module:
@@ -159,6 +177,22 @@ java -jar benchmarks/integration/target/integration-bench.jar
 
 See [`benchmarks/README.md`](benchmarks/README.md) for the experiments, the result files and the
 procedure for the official run.
+
+## Report
+
+The report is [`docs/report.pdf`](docs/report.pdf). Its source is the set of Markdown sections in
+[`docs/report/`](docs/report/), one per section of the assignment, with figures in
+`docs/report/figures/`. To rebuild the PDF after editing a section (needs pandoc 3.1+ and Typst
+0.13+ on the PATH):
+
+```bash
+python scripts/build_report.py
+```
+
+The script assembles the sections in order, numbers the cross-references, inserts the rendered
+architecture diagrams and compiles `docs/report.typ` into `docs/report.pdf`, with a cover page, a
+table of contents and page numbers. If a Mermaid diagram of `docs/report/arquitectura.md` changes,
+render it again into `docs/report/figures/architecture-<n>.png` with the Mermaid CLI (`mmdc`).
 
 ## Technology versions
 
