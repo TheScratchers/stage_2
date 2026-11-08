@@ -160,6 +160,22 @@ java -jar benchmarks/integration/target/integration-bench.jar
 See [`benchmarks/README.md`](benchmarks/README.md) for the experiments, the result files and the
 procedure for the official run.
 
+## Report
+
+The report is [`docs/report.pdf`](docs/report.pdf). Its source is the set of Markdown sections in
+[`docs/report/`](docs/report/), one per section of the assignment, with figures in
+`docs/report/figures/`. To rebuild the PDF after editing a section (needs pandoc 3.1+ and Typst
+0.13+ on the PATH):
+
+```bash
+python scripts/build_report.py
+```
+
+The script assembles the sections in order, numbers the cross-references, inserts the rendered
+architecture diagrams and compiles `docs/report.typ` into `docs/report.pdf`, with a cover page, a
+table of contents and page numbers. If a Mermaid diagram of `docs/report/arquitectura.md` changes,
+render it again into `docs/report/figures/architecture-<n>.png` with the Mermaid CLI (`mmdc`).
+
 ## Technology versions
 
 Java 17 · Javalin 6.1.3 · Gson 2.11.0 · SLF4J 2.0.9 · sqlite-jdbc 3.47.1.0 · ActiveMQ 6.3.2 ·
